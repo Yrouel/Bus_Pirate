@@ -2,9 +2,11 @@
 
  Pirate-Loader for Bootloader v4
 
- Version  : 1.0.4
+ Version  : 1.0.5
 
  Changelog:
+
+  + 2025-08-15 - Add back support for BPv3, detected from smaller PIC devices
 
   + 2024-03-31 - Improve the error reporting and do not show the errors after
                  the successful actions like hello or flashing new firmware.
@@ -61,7 +63,7 @@
 #include <fcntl.h>
 #include <errno.h>
 
-#define PIRATE_LOADER_VERSION "1.0.4"
+#define PIRATE_LOADER_VERSION "1.0.5"
 
 #define STR_EXPAND(tok) #tok
 #define OS_NAME(tok) STR_EXPAND(tok)
@@ -203,6 +205,7 @@ typedef unsigned long  uint32;
 #define BOOTLOADER_OK 'K'
 #define BOOTLOADER_PROT 'P'
 #define BOOTLOADER_CHECKSUM 'N'
+#define BOOTLOADER_PLACEMENT 1
 
 #define PIC_WORD_SIZE  (3)
 #define PIC_NUM_ROWS_IN_PAGE  8
@@ -220,6 +223,7 @@ typedef unsigned long  uint32;
 #define IS_24FJ 1
 #define PIC_NUM_PAGES 512
 
+#define BPV3_FLASHSIZE 0XAC00
 //#define flashsize 0x2AC00 //was 0xac00
 //#define PIC_NUM_PAGES 512
 
@@ -603,6 +607,29 @@ int sendFirmware(int fd, uint8* data, uint8* pages_used)
     return done;
 }
 
+void fixJumps(uint8* bin_buff, uint8* pages_used)
+{
+    uint32 iGotoUserAppAdress = 0;
+    uint32 iGotoUserAppAdressB3 = 0, iIter = 0;
+    uint32 iBLAddress = 0;
+    
+    iBLAddress = ( flashsize - (BOOTLOADER_PLACEMENT * PIC_NUM_ROWS_IN_PAGE * PIC_NUM_WORDS_IN_ROW * 2)); //PCU
+    iGotoUserAppAdress = iBLAddress  - 4; 
+    iGotoUserAppAdressB3 = (iGotoUserAppAdress / 2) * 3;
+    
+    for ( iIter = 0; iIter < 6; iIter++ ) {
+    	bin_buff[ iGotoUserAppAdressB3 + iIter ] = bin_buff[ iIter ];
+    }
+    
+    pages_used[ (iGotoUserAppAdressB3 / PIC_PAGE_SIZE) ] = 1;
+    
+    bin_buff[0] = 0x04;
+    bin_buff[1] = ( (iBLAddress & 0x0000FE) );
+    bin_buff[2] = ( (iBLAddress & 0x00FF00) >> 8 );
+    bin_buff[3] = 0x00;	
+    bin_buff[4] = ( (iBLAddress & 0x7F0000) >> 16 );
+    bin_buff[5] = 0x00;
+}
 
 /* non-firmware functions */
 
@@ -760,9 +787,6 @@ int main (int argc, const char** argv)
         }
 
         printf("Found %d words (%d bytes)\n", res, res * 3);
-
-        //printf("Fixing bootloader/userprogram jumps\n");
-        //fixJumps(bin_buff, pages_used);
     }
 
     if( g_simulate )
@@ -1257,7 +1281,10 @@ int main (int argc, const char** argv)
 
     if( !g_hello_only )
     {
-
+        if(flashsize <= BPV3_FLASHSIZE) {
+            printf("Fixing bootloader/userprogram jumps\n");
+            fixJumps(bin_buff, pages_used);
+        }
         res = sendFirmware(dev_fd, bin_buff, pages_used);
 
         if( res > 0 )
@@ -1272,17 +1299,19 @@ int main (int argc, const char** argv)
         }
     }
 
-    uint8  command[6] = {0};
+    if(flashsize > BPV3_FLASHSIZE) {
+        uint8  command[6] = {0};
 
-    command[0] = 1;	// fake data
-    command[1] = 2;
-    command[2] = 3;
-    command[COMMAND_OFFSET] = 0xff;
-    command[LENGTH_OFFSET ] = 0x01; // 1 byte, CRC
-    command[PAYLOAD_OFFSET] = makeCrc(command, 5);
+        command[0] = 1;	// fake data
+        command[1] = 2;
+        command[2] = 3;
+        command[COMMAND_OFFSET] = 0xff;
+        command[LENGTH_OFFSET ] = 0x01; // 1 byte, CRC
+        command[PAYLOAD_OFFSET] = makeCrc(command, 5);
 
-    // send byebye (cmd: 0xff)
-    int ret = sendCommandAndWaitForResponse(dev_fd, command);
+        // send byebye (cmd: 0xff)
+        int ret = sendCommandAndWaitForResponse(dev_fd, command);
+    }
 
 Finished:
     if( bin_buff )
