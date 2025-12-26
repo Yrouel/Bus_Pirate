@@ -332,9 +332,6 @@ void HD44780_Init(unsigned char displaylines){
 
 //reset LCD to 4bit mode
 void HD44780_Reset(void){
-
-        HD44780_SPIwrite(0); //clear IO pins to HD44780
-        //# Wait more than 15 msecs after power is applied.
         bp_delay_ms(15);
         //# Write 0x03 to LCD and wait 5 msecs for the instruction to complete
         HD44780_WriteNibble(HD44780_COMMAND, 0x03);
