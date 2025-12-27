@@ -235,8 +235,15 @@ void LCDsetup_exc(void) {
 
 void LCDmacro(unsigned int c) {
     int input, i;
+
+    consumewhitechars();
+    if (cmdbuf[cmdstart] == ')') {
+        cmdstart = (cmdstart + 1) & CMDLENMSK;
+    }
+
     consumewhitechars();
     input = getint();
+
     mode_configuration.command_error = NO;
     
     switch (c) {
