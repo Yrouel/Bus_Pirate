@@ -108,11 +108,11 @@ struct _HD44780_interface {
 } HD44780;
 
 /* Private helpers */
-static void HD44780_Reset(void);
-static void HD44780_Init(unsigned char displaylines);
-static void HD44780_WriteByte(unsigned char reg, unsigned char dat);
-static void HD44780_WriteNibble(unsigned char reg, unsigned char dat);
-static void HD44780_write(unsigned char byte);
+static void HD44780_Reset(void); //reset the LCD to 4 bit mode
+static void HD44780_Init(unsigned char displaylines); //initialize LCD to 4bit mode with typical settings and X displaylines
+static void HD44780_WriteByte(unsigned char reg, unsigned char dat); //write a byte to LCD to register REG
+static void HD44780_WriteNibble(unsigned char reg, unsigned char dat); //write 4 bits to LCD to register REG
+static void HD44780_Write(unsigned char datout); //abstracts data output to 74HC595 or PCF8574 backpacks
 static void HD44780_Test(unsigned char first_ch, unsigned char last_ch, int count);
 
 /* 
@@ -243,7 +243,6 @@ void LCDsetup_exc(void) {
 }
 
 void LCDmacro(unsigned int c) {
-    //int input, i;
     int input;
 
     consumewhitechars();
@@ -326,7 +325,7 @@ void HD44780_Init(unsigned char displaylines) {
 
 //reset LCD to 4bit mode
 void HD44780_Reset(void) {
-    HD44780_write(0);//clear IO pins to HD44780
+    HD44780_Write(0);//clear IO pins to HD44780
 
     bp_delay_ms(15);
     //# Write 0x03 to LCD and wait 5 msecs for the instruction to complete
@@ -364,26 +363,26 @@ void HD44780_WriteNibble(unsigned char reg, unsigned char dat) {
         dat |= HCT595_LCD_LED; //keep LED on
     }
 
-    HD44780_write(dat);  // Setup: EN low, data/RS ready
+    HD44780_Write(dat);  // Setup: EN low, data/RS ready
 
     dat |= (HD44780.adapter_type == ADAPTER_I2C ? PCF8574_LCD_EN : HCT595_LCD_EN);
-    HD44780_write(dat);  // EN high (execute)
+    HD44780_Write(dat);  // EN high (execute)
     
     dat &= ~(HD44780.adapter_type == ADAPTER_I2C ? PCF8574_LCD_EN : HCT595_LCD_EN);
-    HD44780_write(dat);  // EN low (end)
+    HD44780_Write(dat);  // EN low (end)
 }
 
 /* Low-level transport abstraction */
-static void HD44780_write(unsigned char dat) {
+static void HD44780_Write(unsigned char datout) {
     if (HD44780.adapter_type == ADAPTER_I2C) {
         bitbang_i2c_start(BITBANG_I2C_START_ONE_SHOT);
         bitbang_write_value(HD44780.i2c_address);
         if (bitbang_read_bit() == 1) { MSG_NACK; return; }
-        bitbang_write_value(dat);
+        bitbang_write_value(datout);
         if (bitbang_read_bit() == 1) { MSG_NACK; return; }
         bitbang_i2c_stop();
     } else {
-        spi_write_byte(dat);
+        spi_write_byte(datout);
         SPICS = 1;
         SPICS = 0;
     }
