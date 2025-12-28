@@ -193,37 +193,21 @@ void LCDsetup(void) {
         HD44780.RS_mask = PCF8574_LCD_RS;
         HD44780.RW_mask = PCF8574_LCD_RW;
         HD44780.LED_mask = PCF8574_LCD_LED;
-        
-        //******** REQUIRED DEFINES ***********
-        #define SCL             BP_CLK
-        #define SCL_TRIS        BP_CLK_DIR     //-- The SCL Direction Register Bit
-        #define SDA             BP_MOSI        //-- The SDA output pin
-        #define SDA_TRIS        BP_MOSI_DIR    //-- The SDA Direction Register Bit
 
         //-- Ensure pins are in high impedance mode --
-    	SDA_TRIS = 1;
-    	SCL_TRIS = 1;
+        BP_CLK_DIR = 1;             //SCL Direction Register Bit
+        BP_MOSI_DIR = 1;            //SDA Direction Register Bit
+
     	//writes to the PORTs write to the LATCH
-    	SCL = 0;			//B8 scl 
-    	SDA = 0;			//B9 sda
+        BP_CLK = 0;                 //B8 SCL
+        BP_MOSI = 0;                //B9 SDA
+
         bitbang_setup(2, BITBANG_SPEED_100KHZ); //2wire mode, 100kHz (PCF8574 max)
     } else {
         HD44780.EN_mask = HCT595_LCD_EN;
         HD44780.RS_mask = HCT595_LCD_RS;
         HD44780.RW_mask = HCT595_LCD_RW;
         HD44780.LED_mask = HCT595_LCD_LED;
-
-        //direction registers
-        #define SPIMOSI_TRIS    BP_MOSI_DIR     
-        #define SPICLK_TRIS     BP_CLK_DIR      
-        #define SPIMISO_TRIS    BP_MISO_DIR     
-        #define SPICS_TRIS      BP_CS_DIR       
-
-        //pin control registers
-        #define SPIMOSI         BP_MOSI
-        #define SPICLK          BP_CLK  
-        #define SPIMISO         BP_MISO 
-        #define SPICS           BP_CS
 
 		//PPS Setup
 		// Inputs
@@ -232,13 +216,13 @@ void LCDsetup(void) {
 		BP_MOSI_RPOUT = SDO1_IO;   //B9 MOSI
 		BP_CLK_RPOUT = SCK1OUT_IO; //B8 CLK
 
-        SPICS = 0;                 //B6 cs low
-        SPICS_TRIS = 0;            //B6 cs output
+        BP_CS = 0;                  //B6 CS low
+        BP_CS_DIR = 0;              //B6 CS output
 
         //pps configures pins and this doesn't really matter....
-        SPICLK_TRIS = 0;           //B8 sck output
-        SPIMISO_TRIS = 1;          //B7 SDI input
-        SPIMOSI_TRIS = 0;          //B9 SDO output
+        BP_CLK_DIR = 0;             //B8 SCK output
+        BP_MISO_DIR = 1;            //B7 SDI input
+        BP_MOSI_DIR = 0;            //B9 SDO output
 
         /* CKE=1, CKP=0, SMP=0 */
         SPI1CON1 = 0b0100111101; //(SPIspeed[modeConfig.speed]); // CKE (output edge) active to idle, CKP idle low, SMP data sampled middle of output time.
@@ -393,8 +377,10 @@ static void HD44780_Write(unsigned char datout) {
         bitbang_i2c_stop();
     } else {
         spi_write_byte(datout);
-        SPICS = 1;
-        SPICS = 0;
+        BP_CS = 1; //B6 CS high
+        BP_CS = 0; //B6 CS low
+        //SPICS = 1;
+        //SPICS = 0;
     }
 }
 
