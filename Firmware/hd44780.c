@@ -173,7 +173,7 @@ void LCDstop(void) {
 
 void LCDsetup(void) {
     int choice;
-    mode_configuration.high_impedance = YES;
+    mode_configuration.high_impedance = ON;
     mode_configuration.command_error = NO;
 
     HD44780.RS = HD44780_DATA;
@@ -194,13 +194,11 @@ void LCDsetup(void) {
         HD44780.RW_mask = PCF8574_LCD_RW;
         HD44780.LED_mask = PCF8574_LCD_LED;
 
-        //-- Ensure pins are in high impedance mode --
-        BP_CLK_DIR = 1;             //SCL Direction Register Bit
-        BP_MOSI_DIR = 1;            //SDA Direction Register Bit
+        BP_CLK_DIR = INPUT;             //SCL Direction Register Bit
+        BP_MOSI_DIR = INPUT;            //SDA Direction Register Bit
 
-    	//writes to the PORTs write to the LATCH
-        BP_CLK = 0;                 //B8 SCL
-        BP_MOSI = 0;                //B9 SDA
+        BP_CLK = LOW;                   //B8 SCL
+        BP_MOSI = LOW;                  //B9 SDA
 
         bitbang_setup(2, BITBANG_SPEED_100KHZ); //2wire mode, 100kHz (PCF8574 max)
     } else {
@@ -213,16 +211,16 @@ void LCDsetup(void) {
 		// Inputs
 		RPINR20bits.SDI1R = BP_MISO_RPIN; //MISO
 		// Outputs
-		BP_MOSI_RPOUT = SDO1_IO;   //B9 MOSI
-		BP_CLK_RPOUT = SCK1OUT_IO; //B8 CLK
+		BP_MOSI_RPOUT = SDO1_IO;          //B9 MOSI
+		BP_CLK_RPOUT = SCK1OUT_IO;        //B8 CLK
 
-        BP_CS = 0;                  //B6 CS low
-        BP_CS_DIR = 0;              //B6 CS output
+        BP_CS = LOW;                      //B6 CS low
+        BP_CS_DIR = OUTPUT;               //B6 CS output
 
         //pps configures pins and this doesn't really matter....
-        BP_CLK_DIR = 0;             //B8 SCK output
-        BP_MISO_DIR = 1;            //B7 SDI input
-        BP_MOSI_DIR = 0;            //B9 SDO output
+        BP_CLK_DIR = OUTPUT;              //B8 SCK output
+        BP_MISO_DIR = INPUT;              //B7 SDI input
+        BP_MOSI_DIR = OUTPUT;             //B9 SDO output
 
         /* CKE=1, CKP=0, SMP=0 */
         SPI1CON1 = 0b0100111101; //(SPIspeed[modeConfig.speed]); // CKE (output edge) active to idle, CKP idle low, SMP data sampled middle of output time.
@@ -231,9 +229,9 @@ void LCDsetup(void) {
         //SPI1CON1bits.CKP=0;
         //SPI1CON1bits.CKE=1;           
         //SPI1CON1bits.SMP=0;
-        SPI1CON2 = 0;
-        SPI1STAT = 0;    // clear SPI
-        SPI1STATbits.SPIEN = 1;
+        SPI1CON2 = 0x0000;
+        SPI1STAT = 0x0000;    // clear SPI
+        SPI1STATbits.SPIEN = ON;
     }
     BPMSG1216; // Adapter ready message
 }
@@ -330,12 +328,15 @@ void HD44780_Reset(void) {
     //# Write 0x03 to LCD and wait 5 msecs for the instruction to complete
     HD44780_WriteNibble(HD44780_COMMAND, 0x03);
     bp_delay_ms(5);
+
     //# Write 0x03 to LCD and wait 160 usecs for instruction to complete
     HD44780_WriteNibble(HD44780_COMMAND, 0x03);
     bp_delay_us(160);
+
     //# Write 0x03 AGAIN to LCD and wait 160 usecs (or poll the Busy Flag)
     HD44780_WriteNibble(HD44780_COMMAND, 0x03);
     bp_delay_us(160);
+
     //Set the Operating Characteristics of the LCD
     //* Write 0x02 to the LCD to Enable Four Bit Mode
     HD44780_WriteNibble(HD44780_COMMAND, 0x02);
@@ -377,10 +378,8 @@ static void HD44780_Write(unsigned char datout) {
         bitbang_i2c_stop();
     } else {
         spi_write_byte(datout);
-        BP_CS = 1; //B6 CS high
-        BP_CS = 0; //B6 CS low
-        //SPICS = 1;
-        //SPICS = 0;
+        BP_CS = HIGH;   //B6 CS high
+        BP_CS = LOW;    //B6 CS low
     }
 }
 
