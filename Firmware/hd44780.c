@@ -105,6 +105,11 @@ struct _HD44780_interface {
     unsigned char LED:1;
     unsigned char adapter_type:1;   //0=SPI (74HC595), 1=I2C (PCF8574)
     unsigned char i2c_address;      //PCF8574 write address (7-bit << 1)
+    /* Abstract pinout across adapters */
+    uint8_t EN_mask;
+    uint8_t RS_mask;
+    uint8_t RW_mask;
+    uint8_t LED_mask;
 } HD44780;
 
 /* Private helpers */
@@ -184,6 +189,11 @@ void LCDsetup(void) {
         BPMSG1215; // "I2C address (default 0x27):"
         HD44780.i2c_address = getnumber(PCF8574_DEFAULT_ADDRESS, 0, 255, 0) << 1;
         
+        HD44780.EN_mask = PCF8574_LCD_EN;
+        HD44780.RS_mask = PCF8574_LCD_RS;
+        HD44780.RW_mask = PCF8574_LCD_RW;
+        HD44780.LED_mask = PCF8574_LCD_LED;
+        
         //******** REQUIRED DEFINES ***********
         #define SCL             BP_CLK
         #define SCL_TRIS        BP_CLK_DIR     //-- The SCL Direction Register Bit
@@ -198,6 +208,11 @@ void LCDsetup(void) {
     	SDA = 0;			//B9 sda
         bitbang_setup(2, BITBANG_SPEED_100KHZ); //2wire mode, 100kHz (PCF8574 max)
     } else {
+        HD44780.EN_mask = HCT595_LCD_EN;
+        HD44780.RS_mask = HCT595_LCD_RS;
+        HD44780.RW_mask = HCT595_LCD_RW;
+        HD44780.LED_mask = HCT595_LCD_LED;
+
         //direction registers
         #define SPIMOSI_TRIS    BP_MOSI_DIR     
         #define SPICLK_TRIS     BP_CLK_DIR      
@@ -355,20 +370,15 @@ void HD44780_WriteNibble(unsigned char reg, unsigned char dat) {
     
     dat = dat << 4; //Nibble to upper bits to match adapter pinout
 
-    if (HD44780.adapter_type == ADAPTER_I2C) {
-        if (reg == HD44780_DATA) { dat |= PCF8574_LCD_RS; }
-        dat |= PCF8574_LCD_LED; //keep LED on
-    } else {
-        if (reg == HD44780_DATA) { dat |= HCT595_LCD_RS; }
-        dat |= HCT595_LCD_LED; //keep LED on
-    }
+    if (reg == HD44780_DATA) { dat |= HD44780.RS_mask; }
+    dat |= HD44780.LED_mask; //keep LED on
 
     HD44780_Write(dat);  // Setup: EN low, data/RS ready
 
-    dat |= (HD44780.adapter_type == ADAPTER_I2C ? PCF8574_LCD_EN : HCT595_LCD_EN);
+    dat |= HD44780.EN_mask;
     HD44780_Write(dat);  // EN high (execute)
     
-    dat &= ~(HD44780.adapter_type == ADAPTER_I2C ? PCF8574_LCD_EN : HCT595_LCD_EN);
+    dat &= ~HD44780.EN_mask;
     HD44780_Write(dat);  // EN low (end)
 }
 
