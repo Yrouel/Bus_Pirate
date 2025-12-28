@@ -18,8 +18,6 @@
 
 #include <xc.h>
 
-#include <p24fxxxx.h>
-
 #define VREG33_DIR TRISAbits.TRISA0
 #define VREG33_EN LATAbits.LATA0
 #define MODE_LED_DIR TRISAbits.TRISA1

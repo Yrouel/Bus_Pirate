@@ -1,10 +1,16 @@
 # Bus Pirate
 
-The Bus Pirate is an open source hacker multi-tool that talks to electronic stuff. It's got a bunch of features an intrepid hacker might need to prototype their next project.
+>
+> THIS REPOSITORY IS ONLY FOR THE OLD BUS PIRATE v3.x and v4.x HARDWARE!
+>
+> If you own a Bus Pirate 5 or later, please see https://buspirate.com
+>
 
-This community firmware was forked from the official Dangerous Prototypes firmware due to perceived lack of interest in upkeep of the Bus Pirate firmware.  This repository represents the hard work of community members to sustain and continue the legacy of the Bus Pirate device.
+The Bus Pirate is an open source hacker multi-tool that talks to electronic stuff.
+It's got a bunch of features an intrepid hacker might need to prototype their next project.
 
-As of this writing (Dec, 2016), it is our opinion that this repository contains the latest code for the Bus Pirate boards version 3 and 4.
+This community firmware was forked from the official Dangerous Prototypes firmware for these devices.
+This repository represents the hard work of community members to sustain and continue the legacy of the Bus Pirate v3 and v4 devices.
 
 ## Protocols
     
@@ -50,14 +56,14 @@ The Bus Pirate is used through a simple terminal interface, but these applicatio
 
 # Purchasing
 
+> 2025 - If you're looking to purchase an old Bus Pirate v3, or v4.. don't
+> spend over $30-40 USD. Spend your hard-earned cash on a Bus Pirate 5+ https://buspirate.com
+
 * Bus Pirate v4.0 - *Newer, more space for bigger firmwares*
-  * Worldwide: <https://www.seeedstudio.com/Bus-Pirate-v4-p-740.html>
+  * Worldwide: amazon.com has some overpriced old stock boards.
 
 * Bus Pirate v3.6 - *Proven, more well tested*
-  * Worldwide: <http://www.seeedstudio.com/depot/bus-pirate-v3-assembled-p-609.html?cPath=61_68>
-  * USA: <https://www.adafruit.com/products/237?&main_page=product_info&cPath=8&products_id=237>
-  * USA: <http://www.epictinker.com/Bus-Pirate-v3-assembled-p/thm180c4m.htm>
-  * Germany: <http://www.watterott.com/en/Bus-Pirate>
+  * Worldwide: amazon.com has some overpriced old stock boards.
   * Europe: <https://www.robotshop.com/uk/bus-pirate-v36a.html>
   * USA: <https://anibit.com/product/ptt07001>
 

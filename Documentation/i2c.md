@@ -29,8 +29,8 @@ Starting I2C Mode
     …
     (1) >4    <<<choose I2C mode
     Set speed:
-    1 . 50KHz
-    2 . 100KHz
+    1 . 50kHz
+    2 . 100kHz
     3 . 400kHz
     (1) >1    <<<choose I2C speed
     I2C READY

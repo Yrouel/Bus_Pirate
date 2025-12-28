@@ -1,31 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configurationDescriptor version="65">
+<configurationDescriptor version="62">
   <logicalFolder name="root" displayName="root" projectFiles="true">
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
-      <itemPath>../devices.inc</itemPath>
-      <itemPath>../settings.inc</itemPath>
     </logicalFolder>
-    <logicalFolder name="ExternalFiles"
-                   displayName="Important Files"
-                   projectFiles="true">
-      <itemPath>Makefile</itemPath>
-    </logicalFolder>
+      <itemPath>../base.h</itemPath>
+      <itemPath>../UART.h</itemPath>
+      <itemPath>../hardwarev0a.h</itemPath>
+      <itemPath>../hardwarev1a.h</itemPath>
+      <itemPath>../hardwarev25.h</itemPath>
+      <itemPath>../hardwarev2a.h</itemPath>
+      <itemPath>../jtag.h</itemPath>
+      <itemPath>../jtag/lenval.h</itemPath>
+      <itemPath>../jtag/micro.h</itemPath>
+      <itemPath>../jtag/ports.h</itemPath>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
                    projectFiles="true">
-      <itemPath>../p24FJ64GA002.gld</itemPath>
     </logicalFolder>
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <itemPath>../ds30loader.s</itemPath>
+      <itemPath>../main.c</itemPath>
+      <itemPath>../base.c</itemPath>
+      <itemPath>../jtag.c</itemPath>
+      <itemPath>../jtag/lenval.c</itemPath>
+      <itemPath>../jtag/micro.c</itemPath>
+      <itemPath>../jtag/ports.c</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false">
+      <itemPath>Makefile</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
     <Elem>..</Elem>
-    <Elem>../src</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -40,11 +51,6 @@
         <languageToolchainVersion>2.10</languageToolchainVersion>
         <platform>2</platform>
       </toolsSet>
-      <packs>
-        <pack name="PIC24F-GA-GB_DFP" vendor="Microchip" version="1.10.375"/>
-      </packs>
-      <ScriptingSettings>
-      </ScriptingSettings>
       <compileType>
         <linkerTool>
           <linkerLibItems>
@@ -57,12 +63,9 @@
           <parseOnProdLoad>true</parseOnProdLoad>
           <alternateLoadableFile></alternateLoadableFile>
         </loading>
-        <subordinates>
-        </subordinates>
       </compileType>
       <makeCustomizationType>
         <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
-        <makeUseCleanTarget>false</makeUseCleanTarget>
         <makeCustomizationPreStep></makeCustomizationPreStep>
         <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
         <makeCustomizationPostStep></makeCustomizationPostStep>
@@ -133,10 +136,6 @@
         <property key="warning-level" value="emit-warnings"/>
         <appendMe value="-g"/>
       </C30-AS>
-      <C30-CO>
-        <property key="coverage-enable" value=""/>
-        <property key="stack-guidance" value="false"/>
-      </C30-CO>
       <C30-LD>
         <property key="additional-options-use-response-files" value="false"/>
         <property key="boot-eeprom" value="no_eeprom"/>
@@ -164,7 +163,6 @@
         <property key="linker-stack" value="true"/>
         <property key="linker-symbols" value=""/>
         <property key="map-file" value="${DISTDIR}/${PROJECTNAME}.${IMAGE_TYPE}.map"/>
-        <property key="no-ivt" value="false"/>
         <property key="oXC16ld-extra-opts" value=""/>
         <property key="oXC16ld-fill-upper" value="0"/>
         <property key="oXC16ld-force-link" value="false"/>
@@ -184,16 +182,13 @@
         <property key="warn-section-align" value="true"/>
       </C30-LD>
       <C30Global>
-        <property key="common-include-directories" value=".."/>
+        <property key="common-include-directories" value=""/>
         <property key="dual-boot-partition" value="0"/>
         <property key="fast-math" value="false"/>
         <property key="generic-16-bit" value="false"/>
-        <property key="legacy-libc" value="true"/>
-        <property key="mpreserve-all" value="false"/>
+        <property key="legacy-libc" value="false"/>
         <property key="oXC16glb-macros" value=""/>
         <property key="output-file-format" value="elf"/>
-        <property key="preserve-all" value="false"/>
-        <property key="preserve-file" value=""/>
         <property key="relaxed-math" value="false"/>
         <property key="save-temps" value="true"/>
         <appendMe value="-std=gnu99"/>

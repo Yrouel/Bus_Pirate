@@ -18,8 +18,17 @@
 #include "base.h"
 #include "jtag.h"
 
-_CONFIG2(FNOSC_FRCPLL & OSCIOFNC_ON &POSCMOD_NONE & I2C1SEL_PRI)		// Internal FRC OSC = 8MHz
-_CONFIG1(JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx1) //turn off junk we don't need
+// Internal FRC OSC = 8MHz
+#pragma config FNOSC = FRCPLL // Fast RC Oscillator with Postscaler and PLL Module (FRCDIV+PLL)
+#pragma config OSCIOFNC = ON  // Primary Oscillator Output Function
+#pragma config POSCMOD = NONE // Primary Oscillator is Disabled
+#pragma config I2C1SEL = PRI  // I2C1 Pin Location Select
+// Turn off junk we don't need
+#pragma config JTAGEN = OFF   // JTAG Port
+#pragma config GCP = OFF      // General Segment Code Protection
+#pragma config GWRP = OFF     // General Code Segment Write Protect
+#pragma config FWDTEN = OFF   // Watchdog Timer
+#pragma config ICS = PGx1     // Emulator Pin Placement Select bits
 
 #pragma code
 //this loop services user input and passes it to be processed on <enter>

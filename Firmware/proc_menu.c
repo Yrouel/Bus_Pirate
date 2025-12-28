@@ -423,7 +423,7 @@ void serviceuser(void) {
 
     mode_configuration.command_error = NO;
 
-    bool stop = NO;
+    volatile bool stop = NO;
 
 #ifdef BP_ENABLE_BASIC_SUPPORT
     if (bus_pirate_configuration.basic) {
@@ -1452,6 +1452,10 @@ void print_version_info(void) {
     MSG_CHIP_REVISION_A5;
     break;
 
+  case PIC_REV_A6:
+    MSG_CHIP_REVISION_A6;
+    break;
+
   default:
     MSG_CHIP_REVISION_UNKNOWN;
     break;
@@ -1573,10 +1577,10 @@ void print_status_info(void) {
 #ifdef BUSPIRATEV4
   switch (mode_configuration.alternate_aux) {
   case 0:
-    BPMSG1087;
+    BPMSG1086;
     break;
   case 1:
-    BPMSG1086;
+    BPMSG1087;
     break;
   case 2:
     BPMSG1263;
@@ -1594,10 +1598,10 @@ void print_status_info(void) {
 void print_pins_information(void) {
   BPMSG1226;
 #ifdef BUSPIRATEV4
-  BPMSG1256; // bpWstring("12.(RD)\t11.(BR)\t10.(BLK)\t9.(WT)\t8.(GR)\t7.(PU)\t6.(BL)\t5.(GN)\t4.(YW)\t3.(OR)\t2.(RD)\1.(BR)");
+  BPMSG1256; // bpWstring("12.(Bk)\t11.(Wt)\t10.(Gy)\t9.(Pu)\t8.(Bu)\t7.(Gn)\t6.(Yw)\t5.(Or)\t4.(Rd)\t3.(Br)\t2.(Bk)\1.(Wt)");
   BPMSG1257; // bpWstring("GND\t5.0V\t3.3V\tVPU\tADC\tAUX2\tAUX1\tAUX\t");
 #else
-  BPMSG1233; // bpWstring("1.(BR)\t2.(RD)\t3.(OR)\t4.(YW)\t5.(GN)\t6.(BL)\t7.(PU)\t8.(GR)\t9.(WT)\t0.(BLK)");
+  BPMSG1233; // bpWstring("1.(Br)\t2.(Rd)\t3.(Or)\t4.(Yw)\t5.(Gn)\t6.(Bu)\t7.(Pu)\t8.(Gy)\t9.(Wt)\t0.(Bk)");
   BPMSG1227; // bpWstring("GND\t3.3V\t5.0V\tADC\tVPU\tAUX\t");
 #endif /* BUSPIRATEV4 */
 
@@ -1844,7 +1848,7 @@ void remove_current_character_from_command_line(void) {
     cmdbuf[index] = cmdbuf[index + 1];
 
     /* Write the moved character. */
-    user_serial_transmit_character(cmdbuf[index] != NULL ? cmdbuf[index] : ' ');
+    user_serial_transmit_character(cmdbuf[index] ?: ' ');
 
     /* Update pointer. */
     characters_to_move++;

@@ -249,7 +249,7 @@ void jtagSetup(void){
 
 //this is a new write routine, untested. See old below...
 unsigned char jtagWriteByte(unsigned char c){
-	unsigned char i,j,a,l;
+	volatile unsigned char i,j,a,l;
 
 	jtagClockLow();//begin with clock low...	
 	
@@ -292,7 +292,7 @@ unsigned char jtagWriteByte(unsigned char c){
 }
 
 unsigned char jtagReadByte(void){
-	unsigned char i,j,a;
+	volatile unsigned char i,j,a;
 
 	jtagClockLow();//begin with clock low...	
 	

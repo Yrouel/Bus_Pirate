@@ -24,11 +24,11 @@ Starting SPI Mode
 
     (1)>5    <<<choose SPI mode
     Set speed:
-     1.  30 KHz
-     2. 125 KHz
-     3. 250 KHz
+     1.  30 kHz
+     2. 125 kHz
+     3. 250 kHz
      4.   1 MHz
-     5.  50 KHz
+     5.  50 kHz
      6. 1.3 MHz
      7.   2 MHz
      8. 2.6 MHz

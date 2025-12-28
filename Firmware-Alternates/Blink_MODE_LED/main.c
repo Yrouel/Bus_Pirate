@@ -18,8 +18,6 @@
 
 #include <xc.h>
 
-#include <p24fxxxx.h>
-
 #pragma code
 
 int main(void) {

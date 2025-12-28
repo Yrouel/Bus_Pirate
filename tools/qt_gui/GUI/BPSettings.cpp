@@ -374,7 +374,7 @@ BBIOSettingsGui::BBIOSettingsGui(MainWidgetFrame *parent)
 	QLabel *i2c_label = new QLabel("I2C");
 	m_layout->addWidget(i2c_label, 6, 0);
 	i2c_speed = new QComboBox(this);
-	i2c_speed->addItems(QStringList()<<"5KHz"<<"50KHz");
+	i2c_speed->addItems(QStringList()<<"5kHz"<<"50kHz");
 	i2c_speed->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	m_layout->addWidget(i2c_speed, 7, 0);
 	
@@ -411,7 +411,7 @@ BBIOSettingsGui::BBIOSettingsGui(MainWidgetFrame *parent)
 	QLabel *rawire_label = new QLabel("RawWire", this);
 	m_layout->addWidget(rawire_label, 11, 0);
 	rawwire_speed = new QComboBox(this);
-	rawwire_speed->addItems(QStringList()<<"5KHz"<<"50KHz");
+	rawwire_speed->addItems(QStringList()<<"5kHz"<<"50kHz");
 	rawwire_speed->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	m_layout->addWidget(rawwire_speed, 12, 0);
 	rawwire_output = new QComboBox(this);

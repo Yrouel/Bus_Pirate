@@ -35,10 +35,10 @@ static unsigned char spi_in_sw=0;
 // set the speed (used by PARAM_SCK_DURATION, page 31 in AVR068)
 // For a clock of 3.6864MHz this is:
 // SPI2X SPR1 SPR0 divider result_spi_Freq   avrisp dur
-//  0     0    0     f/4      921KHz :        sckdur =0
-//  0     0    1     f/16     230KHz :        sckdur =1
-//  0     1    0     f/64     57KHz  :        sckdur =2
-//  0     1    1     f/128    28KHz  :        sckdur =3
+//  0     0    0     f/4      921kHz :        sckdur =0
+//  0     0    1     f/16     230kHz :        sckdur =1
+//  0     1    0     f/64     57kHz  :        sckdur =2
+//  0     1    1     f/128    28kHz  :        sckdur =3
 //
 //SPI2X=SPSR bit 0
 //SPR0 and SPR1 =SPCR bit 0 and 1
@@ -54,19 +54,19 @@ unsigned char  spi_set_sck_duration(unsigned char dur)
             sck_dur=12;
 			SPI1CON1 =0; //30khz
         }else if (dur >= 3){
-        	// 28KHz
+            // 28kHz
             sck_dur=3;
 			SPI1CON1 = 0; //30khz
         }else if (dur >= 2){
-        	// 57KHz
+            // 57kHz
             sck_dur=2;
 			SPI1CON1 =0b1000; //63khz
         }else if (dur == 1){
-        	// 230KHz
+            // 230kHz
             sck_dur=1;
 			SPI1CON1 =0b11100; //250khz
         }else if (dur == 0){
-			// 921KHz
+            // 921kHz
             sck_dur=0;
 			SPI1CON1 = 0b11101; //1000khz
         }

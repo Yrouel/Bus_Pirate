@@ -22,12 +22,12 @@ Starting Raw 3-Wire Mode
 
     (1)>7    <<<choose 3-wire mode
     Set speed:
-     1. ~5KHz
-     2. ~50KHz
-     3. ~100KHz
-     4. ~400KHz
+     1. ~5kHz
+     2. ~50kHz
+     3. ~100kHz
+     4. ~400kHz
 
-    (1)>2    <<<choose 50KHz speed
+    (1)>2    <<<choose 50kHz speed
     CS:
      1. CS
      2. /CS *default

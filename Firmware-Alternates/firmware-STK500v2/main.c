@@ -28,7 +28,7 @@
 
 #include "base.h"
 #include "UART.h"
-#include "SPI.h"
+#include "spi.h"
 #include "command.h"
 #include "redefines.h" /* Definitions to get the existing code working with the Bus Pirate */
 

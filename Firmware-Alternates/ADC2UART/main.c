@@ -18,8 +18,6 @@
 
 #include <xc.h>
 
-#include <p24fxxxx.h>
-
 #define VREG_DIR TRISAbits.TRISA0 // sets VREG33_DIR to TRISBIT A0
 #define VREG_EN LATAbits.LATA0    // sets VREG_EN to LAT bit A0 (output latch)
 #define MODE_LED_DIR TRISAbits.TRISA1 // sets the MODE_LED_DIR to TRISBIT A1

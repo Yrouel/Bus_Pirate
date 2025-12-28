@@ -44,13 +44,13 @@ _BPMSG1028_str:
 	.section .text.BPMSG1029, code
 	.global _BPMSG1029_str
 _BPMSG1029_str:
-	.pasciz "1KHz-4,000KHz PWM"
+	.pasciz "1kHz-4,000kHz PWM"
 
 	; BPMSG1030
 	.section .text.BPMSG1030, code
 	.global _BPMSG1030_str
 _BPMSG1030_str:
-	.pasciz "Frequency in KHz "
+	.pasciz "Frequency in kHz "
 
 	; BPMSG1033
 	.section .text.BPMSG1033, code
@@ -176,7 +176,7 @@ _BPMSG1064_str:
 	.section .text.BPMSG1067, code
 	.global _BPMSG1067_str
 _BPMSG1067_str:
-	.pasciz "Set speed:\r\n 1. 100KHz\r\n 2. 400KHz\r\n 3. 1MHz"
+	.pasciz "Set speed:\r\n 1. 100kHz\r\n 2. 400kHz\r\n 3. 1MHz"
 
 	; BPMSG1068
 	.section .text.BPMSG1068, code
@@ -368,7 +368,7 @@ _BPMSG1117_str:
 	.section .text.BPMSG1118, code
 	.global _BPMSG1118_str
 _BPMSG1118_str:
-	.pasciz "http://dangerousprototypes.com"
+	.pasciz "http://github.com/ElderlyPirate"
 
 	; BPMSG1119
 	.section .text.BPMSG1119, code
@@ -704,7 +704,7 @@ _BPMSG1255_str:
 	.section .text.BPMSG1256, code
 	.global _BPMSG1256_str
 _BPMSG1256_str:
-	.pasciz "#12    \t#11    \t#10    \t#09   \t#08   \t#07   \t#06   \t#05   \t#04   \t#03   \t#02   \t#01   "
+	.pasciz "12.(Bk)\t11.(Wt)\t10.(Gy)\t9.(Pu)\t8.(Bu)\t7.(Gn)\t6.(Yw)\t5.(Or)\t4.(Rd)\t3.(Br)\t2.(Bk)\1.(Wt)"
 
 	; BPMSG1257
 	.section .text.BPMSG1257, code
@@ -1096,6 +1096,12 @@ _MSG_CHIP_REVISION_A3_str:
 _MSG_CHIP_REVISION_A5_str:
 	.pasciz "A5"
 
+	; MSG_CHIP_REVISION_A6
+	.section .text.MSG_CHIP_REVISION_A6, code
+	.global _MSG_CHIP_REVISION_A6_str
+_MSG_CHIP_REVISION_A6_str:
+	.pasciz "A6"
+
 	; MSG_CHIP_REVISION_ID_BEGIN
 	.section .text.MSG_CHIP_REVISION_ID_BEGIN, code
 	.global _MSG_CHIP_REVISION_ID_BEGIN_str
@@ -1154,7 +1160,7 @@ _MSG_CURSOR_RIGHT_str:
 	.section .text.MSG_DESTRUCTIVE_BACKSPACE, code
 	.global _MSG_DESTRUCTIVE_BACKSPACE_str
 _MSG_DESTRUCTIVE_BACKSPACE_str:
-	.pasciz <8>, " ", <8>
+	.pasciz "\x08 \x08"
 
 	; MSG_FINISH_SETUP_PROMPT
 	.section .text.MSG_FINISH_SETUP_PROMPT, code
@@ -1544,7 +1550,7 @@ _MSG_SNIFFER_MESSAGE_str:
 	.section .text.MSG_SOFTWARE_MODE_SPEED_PROMPT, code
 	.global _MSG_SOFTWARE_MODE_SPEED_PROMPT_str
 _MSG_SOFTWARE_MODE_SPEED_PROMPT_str:
-	.pasciz "Set speed:\r\n 1. ~5KHz\r\n 2. ~50KHz\r\n 3. ~100KHz\r\n 4. ~400KHz"
+	.pasciz "Set speed:\r\n 1. ~5kHz\r\n 2. ~50kHz\r\n 3. ~100kHz\r\n 4. ~400kHz"
 
 	; MSG_SPI_COULD_NOT_KEEP_UP
 	.section .text.MSG_SPI_COULD_NOT_KEEP_UP, code
@@ -1616,7 +1622,7 @@ _MSG_SPI_SAMPLE_PROMPT_str:
 	.section .text.MSG_SPI_SPEED_PROMPT, code
 	.global _MSG_SPI_SPEED_PROMPT_str
 _MSG_SPI_SPEED_PROMPT_str:
-	.pasciz "Set speed:\r\n 1.  30KHz\r\n 2. 125KHz\r\n 3. 250KHz\r\n 4.   1MHz\r\n 5.  50KHz\r\n 6. 1.3MHz\r\n 7.   2MHz\r\n 8. 2.6MHz\r\n 9. 3.2MHz\r\n10.   4MHz\r\n11. 5.3MHz\r\n12.   8MHz"
+	.pasciz "Set speed:\r\n 1.  30kHz\r\n 2. 125kHz\r\n 3. 250kHz\r\n 4.   1MHz\r\n 5.   2MHz\r\n 6. 2.6MHz\r\n 7.   4MHz\r\n 8.   8MHz\r\n 9.  50kHz\r\n10. 1.3MHz\r\n11. 3.2MHz\r\n12. 5.3MHz"
 
 	; MSG_UART_BAUD_CALCULATED
 	.section .text.MSG_UART_BAUD_CALCULATED, code

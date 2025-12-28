@@ -15,7 +15,8 @@
  */
 #ifndef BASE 
 #define BASE
-#include <p24fxxxx.h>
+
+#include <xc.h>
 
 #define BUSPIRATEV3 
 

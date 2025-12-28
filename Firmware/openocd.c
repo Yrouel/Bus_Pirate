@@ -51,14 +51,15 @@ extern bus_pirate_configuration_t bus_pirate_configuration;
 #endif /* BUSPIRATEV3 */
 
 // open-drain control
-#define OOCD_TDO_ODC BP_MISO
-#define OOCD_TMS_ODC BP_CS
-#define OOCD_CLK_ODC BP_CLK
-#define OOCD_TDI_ODC BP_MOSI
-#define OOCD_SRST_ODC BP_AUX0
+#define OOCD_TDO_ODC BP_MISO_ODC
+#define OOCD_TMS_ODC BP_CS_ODC
+#define OOCD_CLK_ODC BP_CLK_ODC
+#define OOCD_TDI_ODC BP_MOSI_ODC
 #ifdef BUSPIRATEV3
+#define OOCD_SRST_ODC BP_AUX0_ODC
 #define OOCD_TRST_ODC BP_PGD
 #else
+#define OOCD_SRST_ODC BP_AUX_ODC
 #define OOCD_TRST_ODC BP_AUX1
 #endif /* BUSPIRATEV3 */
 
@@ -212,7 +213,9 @@ void binOpenOCD(void) {
 
       j = (inByte << 8) | inByte2; // number of bit sequences
 
-      j = min(j, BP_JTAG_OPENOCD_BIT_SEQUENCES_LIMIT);
+      if (BP_JTAG_OPENOCD_BIT_SEQUENCES_LIMIT < j) {
+          j = BP_JTAG_OPENOCD_BIT_SEQUENCES_LIMIT;
+      }
       buf[0] = CMD_TAP_SHIFT;
       buf[1] = inByte;
       buf[2] = inByte2;
@@ -253,7 +256,7 @@ void binOpenOCD(void) {
 
         /* Clock TDI and TMS out, while reading TDO in. */
 
-        size_t bits_to_process = min(16, bit_sequences);
+        size_t bits_to_process = 16 < bit_sequences ? 16 : bit_sequences;
         size_t counter;
         uint16_t tdo_data_in = 0;
 

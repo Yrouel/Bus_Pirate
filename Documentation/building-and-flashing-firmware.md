@@ -47,7 +47,28 @@ Click the hammer in the toolbar.
 
 The firmware will be saved in `/Firmware/busPirate.X/dist/BusPirate_v3/production/busPirate.X.production.hex` or `/Firmware/busPirate.X/dist/BusPirate_v4/production/busPirate.X.production.hex`, depending on which hardware version you chose to build the firmware for.
 
-# Flashing
+## Building Loaders
+
+***BusPirate v4 - pirate-loader***
+```bash
+cd Bootloaders/BPv4-bootloader
+cmake .
+make
+```
+
+# Packaging
+
+For a release, the following components need built as production artifacts (Clean and build) in MPLABX:
+
+* bpv3
+  * bpv3-firmware.hex - Firmware/busPiriate.X/dist/BusPirate_v3/production/busPirate.X.production.hex
+  * bpv3-bootloader45.hex - Bootloaders/BPv3-bootloader/firmware-v4.5/ds30loader.X/dist/.../xxx.hex
+* bpv4
+  * bpv4-firmware.hex - Firmware/busPirate.X/dist/BusPirate_v4/production/busPirate.X.production.hex
+  * bpv4-bootloader1.hex - Bootloaders/BPv4-bootloader/firmware-v1/bpv4-bootloader.X/dist/.../xxx.hex
+
+
+# Flashing via pirate-loader
 
 *Warning: This section is bound to change really soon*
 
@@ -82,4 +103,19 @@ Bus Pirate v3.5
 Community Firmware v7.1 - goo.gl/gCzQnW [HiZ 1-WIRE UART I2C SPI 2WIRE 3WIRE PIC DIO]
 Bootloader v4.4
 DEVID:0x0447 REVID:0x3046 (24FJ64GA00 2 B8)
+```
+
+# Flashing via pickit2
+
+* Ensure the Bus Pirate is unplugged (The PicKit2 Powers it)
+* Attach the PicKit2 to the Bus Pirate. (Triangle to Triangle. One pin may be extra)
+* Download the firmware and bootloader for your device.
+
+```
+# Erase your Bus Pirate
+pk2cmd -P -F
+# Flash the pirate-loader bootloader
+pk2cmd -P -M -F XXX-bootloader.hex
+# Flash the firmware
+pk2cmd -P -M -F XXX-firmware.hex
 ```

@@ -64,8 +64,18 @@
 ; These can also be set in MPLAB IDE instead, they are found in Configure->Configuration bits...
 ;------------------------------------------------------------------------------
 		;use identical Bus Pirate config fuses
-		config __CONFIG2, FNOSC_FRCPLL & OSCIOFNC_ON &POSCMOD_NONE & I2C1SEL_PRI	
-		config __CONFIG1, JTAGEN_OFF & GCP_OFF & GWRP_OFF & FWDTEN_OFF & ICS_PGx1
+                ; Internal FRC OSC = 8MHz
+                #pragma config FNOSC = FRCPLL ; Fast RC Oscillator with Postscaler and PLL Module (FRCDIV+PLL)
+                #pragma config OSCIOFNC = ON  ; Primary Oscillator Output Function
+                #pragma config POSCMOD = NONE ; Primary Oscillator is Disabled
+                #pragma config I2C1SEL = PRI  ; I2C1 Pin Location Select
+                ; Turn off junk we don't need
+                #pragma config JTAGEN = OFF   ; JTAG Port
+                #pragma config GCP = OFF      ; General Segment Code Protection
+                #pragma config GWRP = OFF     ; General Code Segment Write Protect
+                #pragma config FWDTEN = OFF   ; Watchdog Timer
+                #pragma config ICS = PGx1     ; Emulator Pin Placement Select bits
+                ;
 
 		;config	__CONFIG1, JTAGEN_OFF/*JTAG*/ & GCP_OFF/*code protect*/ & GWRP_OFF/*write protect*/ & BKBUG_OFF/*background debugger*/ & COE_OFF/*clip-on emulation mode*/ & ICS_PGx1/*icd pins select*/ & FWDTEN_OFF/*watchdog timer*/ & WINDIS_OFF/*windowed wdt*/ & FWPSA_PR32/*watchdog prescalar*/ & WDTPS_PS1/*watchdog postscalar*/
 		;config	__CONFIG2, IESO_OFF/*two-speed startup*/ & FNOSC_FRC/*oscillator selection*/ & FCKSM_CSDCMD/*clock switching and clock monitor*/ & OSCIOFNC_OFF/*OSC0/RC15 function*/ & POSCMOD_XT/*oscillator selection*/
