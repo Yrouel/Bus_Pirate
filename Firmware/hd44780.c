@@ -116,6 +116,7 @@ static void HD44780_write(unsigned char byte);
 static void HD44780_SPIwrite(unsigned char byte);
 static void HD44780_I2Cwrite(unsigned char byte);
 static void HD44780_I2Cerror(void);
+static void HD44780_Test(unsigned char first_ch, unsigned char last_ch, int count);
 
 /* 
  * Duplicate the minimum amount of SPI functionality if SPI support is disabled.
@@ -251,7 +252,8 @@ void LCDsetup_exc(void) {
 }
 
 void LCDmacro(unsigned int c) {
-    int input, i;
+    //int input, i;
+    int input;
 
     consumewhitechars();
     if (cmdbuf[cmdstart] == ')') {
@@ -297,6 +299,8 @@ void LCDmacro(unsigned int c) {
             BPMSG1223;
             break;
         case 6: // numbers test
+            HD44780_Test(0x30, 0x39, input); //0 to 9
+            /*
             HD44780_WriteByte(HD44780_COMMAND, CMD_CLEARDISPLAY);
             bp_delay_ms(15);
             unsigned char ch = 0x30;
@@ -307,8 +311,11 @@ void LCDmacro(unsigned int c) {
                 user_serial_transmit_character(ch);
                 ch++;
             }
+            */
             break;
         case 7: // characters test
+            HD44780_Test(0x21, 0x7E, input); //! to ~
+            /*
             HD44780_WriteByte(HD44780_COMMAND, CMD_CLEARDISPLAY);
             bp_delay_ms(15);
             ch = 0x21;
@@ -319,6 +326,7 @@ void LCDmacro(unsigned int c) {
                 user_serial_transmit_character(ch);
                 ch++;
             }
+            */
             break;
         default:
             MSG_UNKNOWN_MACRO_ERROR;
@@ -380,17 +388,18 @@ void HD44780_WriteByte(unsigned char reg, unsigned char dat) {
 }
 
 void HD44780_WriteNibble(unsigned char reg, unsigned char dat) {
+    //EN pin should already be low
+    //RW bit should be 0 (already 0 in dat)
+    //LED bit should be 0 (already 0 in dat)
+    
     dat = dat << 4; //Nibble to upper bits to match adapter pinout
 
     if (HD44780.adapter_type == ADAPTER_I2C) {
         if (reg == HD44780_DATA) { dat |= PCF8574_LCD_RS; }
-
-        //dat &= ~PCF8574_LCD_RW;  // Force write
-
-        //dat |= PCF8574_LCD_LED;
+        dat |= PCF8574_LCD_LED; //keep LED on
     } else {
         if (reg == HD44780_DATA) { dat |= HCT595_LCD_RS; }
-        //dat |= HCT595_LCD_LED;
+        dat |= HCT595_LCD_LED; //keep LED on
     }
 
     HD44780_write(dat);  // Setup: EN low, data/RS ready
@@ -428,6 +437,24 @@ static void HD44780_I2Cwrite(unsigned char datout) {
 
 static void HD44780_I2Cerror(void) {
     BPMSG1224; // I2C error message
+}
+
+static void HD44780_Test(unsigned char first_ch, unsigned char last_ch, int count) {
+    unsigned char ch;
+    int i;
+
+    HD44780_WriteByte(HD44780_COMMAND, CMD_CLEARDISPLAY);
+    bp_delay_ms(15);
+
+    if (count == 0) count = 80;  // Default
+
+    ch = first_ch;
+    for (i = 0; i < count; i++) {
+        if (ch > last_ch) ch = first_ch;
+        HD44780_WriteByte(HD44780_DATA, ch);
+        user_serial_transmit_character(ch);
+        ch++;
+    }
 }
 
 #endif /* BP_ENABLE_HD44780_SUPPORT */
