@@ -44,7 +44,9 @@
 /**
  * @brief Firmware version string, used at startup and for the 'i' command.
  */
-#define BP_FIRMWARE_STRING "ElderlyPirate Firmware v8.0 "
+#define _STRINGIFY(x) #x
+#define STRINGIFY(x) _STRINGIFY(x)
+#define BP_FIRMWARE_STRING "ElderlyPirate Firmware v8.0 - goo.gl/gCzQnW - " STRINGIFY(VERSION) " \r\n"
 
 /**
  * @brief Current mode configuration settings structure.
