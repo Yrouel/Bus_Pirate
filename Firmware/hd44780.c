@@ -113,9 +113,6 @@ static void HD44780_Init(unsigned char displaylines);
 static void HD44780_WriteByte(unsigned char reg, unsigned char dat);
 static void HD44780_WriteNibble(unsigned char reg, unsigned char dat);
 static void HD44780_write(unsigned char byte);
-static void HD44780_SPIwrite(unsigned char byte);
-static void HD44780_I2Cwrite(unsigned char byte);
-static void HD44780_I2Cerror(void);
 static void HD44780_Test(unsigned char first_ch, unsigned char last_ch, int count);
 
 /* 
@@ -180,7 +177,7 @@ void LCDsetup(void) {
 
     // BPMSG1225: "Adapter type:\r\n 1. SPI (74HC595)\r\n 2. I2C (PCF8574)"
     BPMSG1225;
-    choice = getnumber(2, 1, 2, 0);
+    choice = getnumber(2, 1, 2, 0); //Default to I2C adapter
     HD44780.adapter_type = (choice == 2) ? ADAPTER_I2C : ADAPTER_SPI;
     
     if (HD44780.adapter_type == ADAPTER_I2C) {
@@ -192,12 +189,6 @@ void LCDsetup(void) {
         #define SCL_TRIS        BP_CLK_DIR     //-- The SCL Direction Register Bit
         #define SDA             BP_MOSI        //-- The SDA output pin
         #define SDA_TRIS        BP_MOSI_DIR    //-- The SDA Direction Register Bit
-	
-        #define I2CLOW          0         //-- Puts pin into output/low mode
-        #define I2CHIGH         1         //-- Puts pin into Input/high mode
-	
-        #define I2C_SLOW        0
-        #define I2C_FAST        1
 
         //-- Ensure pins are in high impedance mode --
     	SDA_TRIS = 1;
@@ -205,7 +196,7 @@ void LCDsetup(void) {
     	//writes to the PORTs write to the LATCH
     	SCL = 0;			//B8 scl 
     	SDA = 0;			//B9 sda
-        bitbang_setup(2, 1); //2wire mode, high speed
+        bitbang_setup(2, BITBANG_SPEED_100KHZ); //2wire mode, 100kHz (PCF8574 max)
     } else {
         //direction registers
         #define SPIMOSI_TRIS    BP_MOSI_DIR     
@@ -277,11 +268,6 @@ void LCDmacro(unsigned int c) {
             BPMSG1093;
             HD44780_Reset();
 
-            if (HD44780.adapter_type == ADAPTER_I2C) {
-                BPMSG1215;
-                HD44780.i2c_address = getnumber(PCF8574_DEFAULT_ADDRESS, 0, 255, 0) << 1;
-            }
-
             if (!((input >= 1) && (input <= 2))) {
                 BPMSG1220;
                 input = getnumber(2, 1, 2, 0);
@@ -300,33 +286,9 @@ void LCDmacro(unsigned int c) {
             break;
         case 6: // numbers test
             HD44780_Test(0x30, 0x39, input); //0 to 9
-            /*
-            HD44780_WriteByte(HD44780_COMMAND, CMD_CLEARDISPLAY);
-            bp_delay_ms(15);
-            unsigned char ch = 0x30;
-            if (input == 0) input = 80;
-            for (i = 0; i < input; i++) {
-                if (ch > 0x39) ch = 0x30;
-                HD44780_WriteByte(HD44780_DATA, ch);
-                user_serial_transmit_character(ch);
-                ch++;
-            }
-            */
             break;
         case 7: // characters test
             HD44780_Test(0x21, 0x7E, input); //! to ~
-            /*
-            HD44780_WriteByte(HD44780_COMMAND, CMD_CLEARDISPLAY);
-            bp_delay_ms(15);
-            ch = 0x21;
-            if (input == 0) input = 80;
-            for (i = 0; i < input; i++) {
-                if (ch > 127) ch = 0x21;
-                HD44780_WriteByte(HD44780_DATA, ch);
-                user_serial_transmit_character(ch);
-                ch++;
-            }
-            */
             break;
         default:
             MSG_UNKNOWN_MACRO_ERROR;
@@ -414,29 +376,17 @@ void HD44780_WriteNibble(unsigned char reg, unsigned char dat) {
 /* Low-level transport abstraction */
 static void HD44780_write(unsigned char dat) {
     if (HD44780.adapter_type == ADAPTER_I2C) {
-        HD44780_I2Cwrite(dat);
+        bitbang_i2c_start(BITBANG_I2C_START_ONE_SHOT);
+        bitbang_write_value(HD44780.i2c_address);
+        if (bitbang_read_bit() == 1) { MSG_NACK; return; }
+        bitbang_write_value(dat);
+        if (bitbang_read_bit() == 1) { MSG_NACK; return; }
+        bitbang_i2c_stop();
     } else {
-        HD44780_SPIwrite(dat);
+        spi_write_byte(dat);
+        SPICS = 1;
+        SPICS = 0;
     }
-}
-
-static void HD44780_SPIwrite(unsigned char datout) {
-    spi_write_byte(datout);
-    SPICS = 1;
-    SPICS = 0;
-}
-
-static void HD44780_I2Cwrite(unsigned char datout) {
-    bitbang_i2c_start(BITBANG_I2C_START_ONE_SHOT);
-    bitbang_write_value(HD44780.i2c_address);
-    if (bitbang_read_bit() == 1) { HD44780_I2Cerror(); return; }
-    bitbang_write_value(datout);
-    if (bitbang_read_bit() == 1) { HD44780_I2Cerror(); return; }
-    bitbang_i2c_stop();
-}
-
-static void HD44780_I2Cerror(void) {
-    BPMSG1224; // I2C error message
 }
 
 static void HD44780_Test(unsigned char first_ch, unsigned char last_ch, int count) {

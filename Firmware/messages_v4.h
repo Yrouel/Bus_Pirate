@@ -221,8 +221,6 @@ void BPMSG1222_str(void);
 #define BPMSG1222 bp_message_write_line(__builtin_tbladdress(BPMSG1222_str))
 void BPMSG1223_str(void);
 #define BPMSG1223 bp_message_write_line(__builtin_tbladdress(BPMSG1223_str))
-void BPMSG1224_str(void);
-#define BPMSG1224 bp_message_write_line(__builtin_tbladdress(BPMSG1224_str))
 void BPMSG1225_str(void);
 #define BPMSG1225 bp_message_write_line(__builtin_tbladdress(BPMSG1225_str))
 void BPMSG1226_str(void);

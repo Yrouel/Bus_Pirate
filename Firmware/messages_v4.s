@@ -658,12 +658,6 @@ _BPMSG1222_str:
 _BPMSG1223_str:
 	.pasciz "CURSOR SET"
 
-	; BPMSG1224
-	.section .text.BPMSG1224, code
-	.global _BPMSG1224_str
-_BPMSG1224_str:
-	.pasciz "No ACK, check adapter"
-
 	; BPMSG1225
 	.section .text.BPMSG1225, code
 	.global _BPMSG1225_str

@@ -633,19 +633,13 @@ _BPMSG1222_str:
 	.global _BPMSG1223_str
 _BPMSG1223_str:
 	.pasciz "CURSOR SET"
-	
-	; BPMSG1224
-	.section .text.BPMSG1224, code
-	.global _BPMSG1224_str
-_BPMSG1224_str:
-	.pasciz "No ACK, check adapter"
 
 	; BPMSG1225
 	.section .text.BPMSG1225, code
 	.global _BPMSG1225_str
 _BPMSG1225_str:
 	.pasciz "Adapter type:\r\n 1. SPI (74HC595)\r\n 2. I2C (PCF8574)"
-	
+
 	; BPMSG1226
 	.section .text.BPMSG1226, code
 	.global _BPMSG1226_str
