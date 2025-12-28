@@ -46,32 +46,51 @@
 
 #define PCF8574_DEFAULT_ADDRESS 0x27
 
+//RS (register select) pin states
 #define HD44780_COMMAND 0 
-#define HD44780_DATA 1
+#define HD44780_DATA 1 
 
-// HD44780 commands (unchanged)
-#define CMD_CLEARDISPLAY        0b00000001
-#define CMD_RETURNHOME          0b00000010
-#define CMD_ENTRYMODESET        0b00000100
-#define INCREMENT               0b10
-#define DECREMENT               0b00
-#define DISPLAYSHIFTON          0b1
-#define DISPLAYSHIFTOFF         0
-#define CMD_DISPLAYCONTROL      0b00001000
-#define DISPLAYON               0b100
-#define DISPLAYOFF              0
-#define CURSERON                0b10
-#define CURSEROFF               0
-#define BLINKON                 0b1
-#define BLINKOFF                0
-#define CMD_FUNCTIONSET         0b00100000
-#define DATAWIDTH8              0b10000
-#define DATAWIDTH4              0
-#define DISPLAYLINES2           0b1000
-#define DISPLAYLINES1           0
-#define FONT5X10                0b100
-#define FONT5X7                 0
-#define CMD_SETDDRAMADDR        0b10000000
+//
+//HD44780 commands and related options
+//
+#define CMD_CLEARDISPLAY        0b00000001 //82us-1.64ms
+
+#define CMD_RETURNHOME          0b00000010 //40us-1.64ms
+
+#define CMD_ENTRYMODESET        0b00000100 //40us
+#define INCREMENT 0b10
+#define DECREMENT 0b00
+#define DISPLAYSHIFTON 0b1
+#define DISPLAYSHIFTOFF 0
+
+#define CMD_DISPLAYCONTROL      0b00001000 //40us
+#define DISPLAYON 0b100
+#define DISPLAYOFF 0
+#define CURSERON 0b10
+#define CURSEROFF 0
+#define BLINKON 0b1
+#define BLINKOFF 0
+
+#define CMD_CURSERDISPLAYSHIFT 0b00010000 //40us
+#define DISPLAYSHIFT 0b1000
+#define CURSERMOVE 0
+#define SHIFTRIGHT 0b100
+#define SHIFTLEFT 0
+
+#define CMD_FUNCTIONSET         0b00100000 //40us
+#define DATAWIDTH8 0b10000
+#define DATAWIDTH4 0
+#define DISPLAYLINES2 0b1000
+#define DISPLAYLINES1 0
+#define FONT5X10 0b100
+#define FONT5X7 0
+#define MODULE24X4 0b1
+
+#define CMD_SETCGRAMADDR        0b01000000 //40us
+//6bit character generator RAM address
+
+#define CMD_SETDDRAMADDR        0b10000000 //40us
+//7bit display data RAM address
 
 #define ADAPTER_SPI 0
 #define ADAPTER_I2C 1
@@ -84,8 +103,8 @@ struct _HD44780_interface {
     unsigned char RS:1; //register select, 0=command, 1=text
     unsigned char RW:1; //read write, 0=write, 1=read
     unsigned char LED:1;
-    unsigned char adapter_type:1;   // 0 = SPI (74HC595), 1 = I2C (PCF8574)
-    unsigned char i2c_address;      // PCF8574 write address (7-bit << 1)
+    unsigned char adapter_type:1;   //0=SPI (74HC595), 1=I2C (PCF8574)
+    unsigned char i2c_address;      //PCF8574 write address (7-bit << 1)
 } HD44780;
 
 /* Private helpers */
@@ -99,8 +118,7 @@ static void HD44780_I2Cwrite(unsigned char byte);
 static void HD44780_I2Cerror(void);
 
 /* 
- * Duplicate the minimum amount of SPI functionality if SPI support
- * is disabled.
+ * Duplicate the minimum amount of SPI functionality if SPI support is disabled.
  */
 
 #ifndef BP_ENABLE_SPI_SUPPORT
@@ -110,27 +128,27 @@ static void HD44780_I2Cerror(void);
 #define SPICLK_ODC              BP_CLK_ODC      
 #define SPICS_ODC               BP_CS_ODC       
 
-unsigned char spi_write_byte(unsigned char c){
-        SPI1BUF = c;
-        while(!IFS0bits.SPI1IF);
-        c=SPI1BUF;
-        IFS0bits.SPI1IF = 0;
-        return c;
+unsigned char spi_write_byte(unsigned char c) {
+    SPI1BUF = c;
+    while(!IFS0bits.SPI1IF);
+    c=SPI1BUF;
+    IFS0bits.SPI1IF = 0;
+    return c;
 }
 
-void spi_disable_interface(void){
-        SPI1STATbits.SPIEN = 0;
-        RPINR20bits.SDI1R=0b11111;  //B7 MISO
-
-        //PPS Disable
-        BP_MOSI_RPOUT=0;
-        BP_CLK_RPOUT=0;
-
-        //disable all open drain control register bits
-        SPIMOSI_ODC=0;
-        SPICLK_ODC=0;
-        SPICS_ODC=0;
-        //make all input maybe???
+void spi_disable_interface(void) {
+    SPI1STATbits.SPIEN = 0;
+    RPINR20bits.SDI1R=0b11111;  //B7 MISO
+    
+    //PPS Disable
+    BP_MOSI_RPOUT=0;
+    BP_CLK_RPOUT=0;
+    
+    //disable all open drain control register bits
+    SPIMOSI_ODC=0;
+    SPICLK_ODC=0;
+    SPICS_ODC=0;
+    //make all input maybe???
 }
 
 #endif /* !BP_ENABLE_SPI_SUPPORT */
@@ -174,11 +192,11 @@ void LCDsetup(void) {
         #define SDA             BP_MOSI        //-- The SDA output pin
         #define SDA_TRIS        BP_MOSI_DIR    //-- The SDA Direction Register Bit
 	
-        #define I2CLOW  	0         //-- Puts pin into output/low mode
-        #define I2CHIGH 	1         //-- Puts pin into Input/high mode
+        #define I2CLOW          0         //-- Puts pin into output/low mode
+        #define I2CHIGH         1         //-- Puts pin into Input/high mode
 	
-        #define I2C_SLOW	0
-        #define I2C_FAST	1
+        #define I2C_SLOW        0
+        #define I2C_FAST        1
 
         //-- Ensure pins are in high impedance mode --
     	SDA_TRIS = 1;
@@ -188,7 +206,6 @@ void LCDsetup(void) {
     	SDA = 0;			//B9 sda
         bitbang_setup(2, 1); //2wire mode, high speed
     } else {
-        /* ---- SPI specific setup ---- */
         //direction registers
         #define SPIMOSI_TRIS    BP_MOSI_DIR     
         #define SPICLK_TRIS     BP_CLK_DIR      
@@ -205,26 +222,26 @@ void LCDsetup(void) {
 		// Inputs
 		RPINR20bits.SDI1R = BP_MISO_RPIN; //MISO
 		// Outputs
-		BP_MOSI_RPOUT = SDO1_IO; //B9 MOSI
+		BP_MOSI_RPOUT = SDO1_IO;   //B9 MOSI
 		BP_CLK_RPOUT = SCK1OUT_IO; //B8 CLK
 
-        SPICS=0;                        //B6 cs low
-        SPICS_TRIS=0;                   //B6 cs output
+        SPICS = 0;                 //B6 cs low
+        SPICS_TRIS = 0;            //B6 cs output
 
         //pps configures pins and this doesn't really matter....
-        SPICLK_TRIS=0;                  //B8 sck output
-        SPIMISO_TRIS=1;                 //B7 SDI input
-        SPIMOSI_TRIS=0;                 //B9 SDO output
+        SPICLK_TRIS = 0;           //B8 sck output
+        SPIMISO_TRIS = 1;          //B7 SDI input
+        SPIMOSI_TRIS = 0;          //B9 SDO output
 
         /* CKE=1, CKP=0, SMP=0 */
-        SPI1CON1=0b0100111101;//(SPIspeed[modeConfig.speed]); // CKE (output edge) active to idle, CKP idle low, SMP data sampled middle of output time.
+        SPI1CON1 = 0b0100111101; //(SPIspeed[modeConfig.speed]); // CKE (output edge) active to idle, CKP idle low, SMP data sampled middle of output time.
         //SPI1CON1=0b11101;
         //SPI1CON1bits.MSTEN=1;
         //SPI1CON1bits.CKP=0;
         //SPI1CON1bits.CKE=1;           
         //SPI1CON1bits.SMP=0;
-        SPI1CON2=0;
-        SPI1STAT=0;    // clear SPI
+        SPI1CON2 = 0;
+        SPI1STAT = 0;    // clear SPI
         SPI1STATbits.SPIEN = 1;
     }
     BPMSG1216; // Adapter ready message
@@ -319,40 +336,42 @@ void LCDpins(void) {
 
 //initialize LCD to 4bits with standard features
 //displaylines=0 for single line displays, displaylines=1 for multiline displays
-void HD44780_Init(unsigned char displaylines){
-        //Function set
-        HD44780_WriteByte(HD44780_COMMAND, (CMD_FUNCTIONSET + DATAWIDTH4 + FONT5X7 + displaylines)); //0x28, 0b101000
-        bp_delay_ms(15);//delay 15ms
-        
-        //Turn display off
-        HD44780_WriteByte(HD44780_COMMAND, CMD_DISPLAYCONTROL + DISPLAYOFF + CURSEROFF + BLINKOFF);//0x08, 0b1000
-        bp_delay_ms(15);//delay 15ms
-        
-        //Clear LCD and return home
-        HD44780_WriteByte(HD44780_COMMAND, CMD_CLEARDISPLAY);
-        bp_delay_ms(15);//delay 15ms
-        
-        //Turn on display, turn off cursor and blink
-        HD44780_WriteByte(HD44780_COMMAND, CMD_DISPLAYCONTROL + DISPLAYON + CURSERON + BLINKOFF);   // 0x0f, 0b1111
-        bp_delay_ms(15);//delay 15ms
+void HD44780_Init(unsigned char displaylines) {
+    //Function set
+    HD44780_WriteByte(HD44780_COMMAND, (CMD_FUNCTIONSET + DATAWIDTH4 + FONT5X7 + displaylines));//0x28, 0b101000
+    bp_delay_ms(15);//delay 15ms
+    
+    //Turn display off
+    HD44780_WriteByte(HD44780_COMMAND, CMD_DISPLAYCONTROL + DISPLAYOFF + CURSEROFF + BLINKOFF);//0x08, 0b1000
+    bp_delay_ms(15);//delay 15ms
+    
+    //Clear LCD and return home
+    HD44780_WriteByte(HD44780_COMMAND, CMD_CLEARDISPLAY);
+    bp_delay_ms(15);//delay 15ms
+    
+    //Turn on display, turn off cursor and blink
+    HD44780_WriteByte(HD44780_COMMAND, CMD_DISPLAYCONTROL + DISPLAYON + CURSERON + BLINKOFF);// 0x0f, 0b1111
+    bp_delay_ms(15);//delay 15ms
 }
 
 //reset LCD to 4bit mode
-void HD44780_Reset(void){
-        bp_delay_ms(15);
-        //# Write 0x03 to LCD and wait 5 msecs for the instruction to complete
-        HD44780_WriteNibble(HD44780_COMMAND, 0x03);
-        bp_delay_ms(5);
-        //# Write 0x03 to LCD and wait 160 usecs for instruction to complete
-        HD44780_WriteNibble(HD44780_COMMAND, 0x03);
-        bp_delay_us(160);
-        //# Write 0x03 AGAIN to LCD and wait 160 usecs (or poll the Busy Flag) 
-        HD44780_WriteNibble(HD44780_COMMAND, 0x03);
-        bp_delay_us(160);
-        //Set the Operating Characteristics of the LCD
-    //* Write 0x02 to the LCD to Enable Four Bit Mode 
-        HD44780_WriteNibble(HD44780_COMMAND, 0x02);
-        bp_delay_us(160);
+void HD44780_Reset(void) {
+    HD44780_write(0);//clear IO pins to HD44780
+
+    bp_delay_ms(15);
+    //# Write 0x03 to LCD and wait 5 msecs for the instruction to complete
+    HD44780_WriteNibble(HD44780_COMMAND, 0x03);
+    bp_delay_ms(5);
+    //# Write 0x03 to LCD and wait 160 usecs for instruction to complete
+    HD44780_WriteNibble(HD44780_COMMAND, 0x03);
+    bp_delay_us(160);
+    //# Write 0x03 AGAIN to LCD and wait 160 usecs (or poll the Busy Flag)
+    HD44780_WriteNibble(HD44780_COMMAND, 0x03);
+    bp_delay_us(160);
+    //Set the Operating Characteristics of the LCD
+    //* Write 0x02 to the LCD to Enable Four Bit Mode
+    HD44780_WriteNibble(HD44780_COMMAND, 0x02);
+    bp_delay_us(160);
 }
 
 void HD44780_WriteByte(unsigned char reg, unsigned char dat) {
@@ -361,7 +380,7 @@ void HD44780_WriteByte(unsigned char reg, unsigned char dat) {
 }
 
 void HD44780_WriteNibble(unsigned char reg, unsigned char dat) {
-    dat = dat << 4;  // Nibble to upper bits to match adapter pinout
+    dat = dat << 4; //Nibble to upper bits to match adapter pinout
 
     if (HD44780.adapter_type == ADAPTER_I2C) {
         if (reg == HD44780_DATA) { dat |= PCF8574_LCD_RS; }
@@ -385,10 +404,11 @@ void HD44780_WriteNibble(unsigned char reg, unsigned char dat) {
 
 /* Low-level transport abstraction */
 static void HD44780_write(unsigned char dat) {
-    if (HD44780.adapter_type == ADAPTER_I2C)
+    if (HD44780.adapter_type == ADAPTER_I2C) {
         HD44780_I2Cwrite(dat);
-    else
+    } else {
         HD44780_SPIwrite(dat);
+    }
 }
 
 static void HD44780_SPIwrite(unsigned char datout) {
