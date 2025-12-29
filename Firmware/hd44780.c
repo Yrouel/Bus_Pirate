@@ -95,6 +95,20 @@
 #define ADAPTER_SPI 0
 #define ADAPTER_I2C 1
 
+#define SCL             BP_CLK
+#define SCL_TRIS        BP_CLK_DIR
+#define SDA             BP_MOSI
+#define SDA_TRIS        BP_MOSI_DIR
+
+#define SPIMOSI_TRIS    BP_MOSI_DIR
+#define SPICLK_TRIS     BP_CLK_DIR
+#define SPIMISO_TRIS    BP_MISO_DIR
+#define SPICS_TRIS      BP_CS_DIR
+#define SPIMOSI         BP_MOSI
+#define SPICLK          BP_CLK
+#define SPIMISO         BP_MISO
+#define SPICS           BP_CS
+
 extern mode_configuration_t mode_configuration;
 extern command_t last_command;
 
@@ -194,11 +208,11 @@ void LCDsetup(void) {
         HD44780.RW_mask = PCF8574_LCD_RW;
         HD44780.LED_mask = PCF8574_LCD_LED;
 
-        BP_CLK_DIR = INPUT;             //SCL Direction Register Bit
-        BP_MOSI_DIR = INPUT;            //SDA Direction Register Bit
+        SCL_TRIS = INPUT;               //SCL Direction Register Bit
+        SDA_TRIS = INPUT;               //SDA Direction Register Bit
 
-        BP_CLK = LOW;                   //B8 SCL
-        BP_MOSI = LOW;                  //B9 SDA
+        SCL = LOW;                      //B8 SCL
+        SDA = LOW;                      //B9 SDA
 
         bitbang_setup(2, BITBANG_SPEED_100KHZ); //2wire mode, 100kHz (PCF8574 max)
     } else {
@@ -214,13 +228,13 @@ void LCDsetup(void) {
 		BP_MOSI_RPOUT = SDO1_IO;          //B9 MOSI
 		BP_CLK_RPOUT = SCK1OUT_IO;        //B8 CLK
 
-        BP_CS = LOW;                      //B6 CS low
-        BP_CS_DIR = OUTPUT;               //B6 CS output
+        SPICS = LOW;                      //B6 CS low
+        SPICS_TRIS = OUTPUT;              //B6 CS output
 
         //pps configures pins and this doesn't really matter....
-        BP_CLK_DIR = OUTPUT;              //B8 SCK output
-        BP_MISO_DIR = INPUT;              //B7 SDI input
-        BP_MOSI_DIR = OUTPUT;             //B9 SDO output
+        SPICLK_TRIS = OUTPUT;             //B8 SCK output
+        SPIMISO_TRIS = INPUT;             //B7 SDI input
+        SPIMOSI_TRIS = OUTPUT;            //B9 SDO output
 
         /* CKE=1, CKP=0, SMP=0 */
         SPI1CON1 = 0b0100111101; //(SPIspeed[modeConfig.speed]); // CKE (output edge) active to idle, CKP idle low, SMP data sampled middle of output time.
@@ -378,8 +392,8 @@ static void HD44780_Write(unsigned char datout) {
         bitbang_i2c_stop();
     } else {
         spi_write_byte(datout);
-        BP_CS = HIGH;   //B6 CS high
-        BP_CS = LOW;    //B6 CS low
+        SPICS = HIGH;   //B6 CS high
+        SPICS = LOW;    //B6 CS low
     }
 }
 
