@@ -52,6 +52,18 @@ _BPMSG1029_str:
 _BPMSG1030_str:
 	.pasciz "Frequency in kHz "
 
+	; BPMSG1031
+	.section .text.BPMSG1031, code
+	.global _BPMSG1031_str
+_BPMSG1031_str:
+	.pasciz "LED ON\r\n"
+
+	; BPMSG1032
+	.section .text.BPMSG1032, code
+	.global _BPMSG1032_str
+_BPMSG1032_str:
+	.pasciz "LED OFF\r\n"
+
 	; BPMSG1033
 	.section .text.BPMSG1033, code
 	.global _BPMSG1033_str
@@ -632,7 +644,7 @@ _BPMSG1216_str:
 	.section .text.BPMSG1219, code
 	.global _BPMSG1219_str
 _BPMSG1219_str:
-	.pasciz " 0.Macro menu\r\n 1.LCD Reset\r\n 2.Init LCD\r\n 3.Clear LCD\r\n 4.Cursor position ex:(4) 0\r\n 6.Write test numbers ex:(6) 80\r\n 7.Write test characters ex:(7) 80"
+	.pasciz " 0.Macro menu\r\n 1.Reset LCD\r\n 2.Init LCD\r\n 3.Clear LCD\r\n 4.Cursor position ex:(4) 0\r\n 5.Toggle backlight\r\n 6.Write test numbers ex:(6) 80\r\n 7.Write test characters ex:(7) 80"
 
 	; BPMSG1220
 	.section .text.BPMSG1220, code
