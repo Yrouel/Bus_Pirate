@@ -118,6 +118,8 @@ struct _HD44780_interface {
     unsigned char RW:1; //read write, 0=write, 1=read
     unsigned char LED:1;
     unsigned char adapter_type:1;   //0=SPI (74HC595), 1=I2C (PCF8574)
+    unsigned char cursor_blinking:1;//Cursor blinking on or off
+    unsigned char cursor_presence;  //Cursor on or off
     unsigned char i2c_address;      //PCF8574 write address (7-bit << 1)
     /* Abstract pinout across adapters */
     uint8_t EN_mask;
@@ -132,7 +134,6 @@ static void HD44780_Init(unsigned char displaylines); //initialize LCD to 4bit m
 static void HD44780_WriteByte(unsigned char reg, unsigned char dat); //write a byte to LCD to register REG
 static void HD44780_WriteNibble(unsigned char reg, unsigned char dat); //write 4 bits to LCD to register REG
 static void HD44780_Write(unsigned char datout); //abstracts data output to 74HC595 or PCF8574 backpacks
-static void HD44780_ToggleBacklight(void);
 static void HD44780_Test(unsigned char first_ch, unsigned char last_ch, int count);
 
 /* 
@@ -191,9 +192,6 @@ void LCDsetup(void) {
     mode_configuration.high_impedance = ON;
     mode_configuration.command_error = NO;
 
-    // Defaults
-    HD44780.RS = HD44780_DATA;
-    HD44780.LED = ON;
     HD44780.adapter_type = ADAPTER_I2C;
     HD44780.i2c_address = PCF8574_DEFAULT_ADDRESS << 1;
 
@@ -254,6 +252,11 @@ void LCDsetup(void) {
 }
 
 void LCDsetup_exc(void) {
+    // Defaults
+    HD44780.RS = HD44780_DATA;
+    HD44780.LED = ON;
+    HD44780.cursor_blinking = BLINKOFF;
+    HD44780.cursor_presence = CURSOROFF;
 }
 
 void LCDmacro(unsigned int c) {
@@ -285,6 +288,7 @@ void LCDmacro(unsigned int c) {
                 BPMSG1220;
                 input = getnumber(2, 1, 2, 0);
             }
+            LCDsetup_exc(); //Reset to defaults
             HD44780_Init((input == 1) ? DISPLAYLINES1 : DISPLAYLINES2);
             BPMSG1221;
             break;
@@ -294,17 +298,40 @@ void LCDmacro(unsigned int c) {
             BPMSG1222;
             break;
         case 4:
+            //Flip LED bit. Drives the transistor on the adapter that switches the backlight
+            HD44780.LED = !HD44780.LED;
+            
+            /*
+             * Toggle the backlight while preserving everything else by sending a harmless command
+             * This is a workaround and a bit of a hack after trying to toggle it
+             * more explicitly/directly caused issues like garbled text or losing init
+             */
+            HD44780_WriteByte(HD44780_COMMAND, CMD_ENTRYMODESET | INCREMENT | DISPLAYSHIFTOFF);
+            HD44780.LED ? BPMSG1031 : BPMSG1032; //"LED ON" : "LED OFF"
+            break;
+        case 5:
+            //CURSORON XOR CURSORON = CURSOROFF -> 0b10 XOR 0b10 = 0b00
+            //CURSOROFF XOR CURSORON = CURSORON -> 0b00 XOR 0b10 = 0b10
+            HD44780.cursor_presence ^= CURSORON;
+            
+            HD44780_WriteByte(HD44780_COMMAND, CMD_DISPLAYCONTROL + DISPLAYON + HD44780.cursor_presence + HD44780.cursor_blinking);// 0x0f, 0b1111
+            HD44780.cursor_presence ? BPMSG1042 : BPMSG1043; //"CURSOR ON" : "CURSOR OFF"
+            break;
+        case 6:
+            //This simple bit flip is possible because BLINKON and BLINKOFF command options happen to be 1 and 0
+            HD44780.cursor_blinking = !HD44780.cursor_blinking;
+
+            HD44780_WriteByte(HD44780_COMMAND, CMD_DISPLAYCONTROL + DISPLAYON + HD44780.cursor_presence + HD44780.cursor_blinking);// 0x0f, 0b1111
+            HD44780.cursor_blinking ? BPMSG1035 : BPMSG1036; //"BLINKING ON" : "BLINKING OFF"
+            break;
+        case 7:
             HD44780_WriteByte(HD44780_COMMAND, CMD_SETDDRAMADDR | (unsigned char)input);
             BPMSG1223;
             break;
-        case 5:
-            HD44780_ToggleBacklight();
-            HD44780.LED ? BPMSG1031 : BPMSG1032; //"LED ON" : "LED OFF"
-            break;
-        case 6: // numbers test
+        case 8: // numbers test
             HD44780_Test(0x30, 0x39, input); //0 to 9
             break;
-        case 7: // characters test
+        case 9: // characters test
             HD44780_Test(0x21, 0x7E, input); //! to ~
             break;
         default:
@@ -329,15 +356,16 @@ void HD44780_Init(unsigned char displaylines) {
     bp_delay_ms(15);//delay 15ms
     
     //Turn display off
-    HD44780_WriteByte(HD44780_COMMAND, CMD_DISPLAYCONTROL + DISPLAYOFF + CURSOROFF + BLINKOFF);//0x08, 0b1000
+    HD44780_WriteByte(HD44780_COMMAND, CMD_DISPLAYCONTROL + DISPLAYOFF + HD44780.cursor_presence + HD44780.cursor_blinking);//0x08, 0b1000
     bp_delay_ms(15);//delay 15ms
     
     //Clear LCD and return home
     HD44780_WriteByte(HD44780_COMMAND, CMD_CLEARDISPLAY);
     bp_delay_ms(15);//delay 15ms
     
-    //Turn on display, turn off cursor and blink
-    HD44780_WriteByte(HD44780_COMMAND, CMD_DISPLAYCONTROL + DISPLAYON + CURSORON + BLINKOFF);// 0x0f, 0b1111
+    //Turn on display, cursor; turn off blink
+    HD44780.cursor_presence ^= CURSORON; //keep state to avoid desync
+    HD44780_WriteByte(HD44780_COMMAND, CMD_DISPLAYCONTROL + DISPLAYON + HD44780.cursor_presence + HD44780.cursor_blinking);// 0x0f, 0b1111
     bp_delay_ms(15);//delay 15ms
 }
 
@@ -402,18 +430,6 @@ static void HD44780_Write(unsigned char datout) {
         SPICS = HIGH;   //B6 CS high
         SPICS = LOW;    //B6 CS low
     }
-}
-
-static void HD44780_ToggleBacklight(void) {
-    //Flip LED bit. Drives the transistor on the adapter that switches the backlight
-    HD44780.LED = !HD44780.LED;
-
-    /*
-     * Toggle the backlight while preserving everything else by sending a harmless command
-     * This is a workaround and a bit of a hack after trying to handle the toggle
-     * more explicitly/directly caused issues like garbled text after toggling or losing init
-    */
-    HD44780_WriteByte(HD44780_COMMAND, CMD_ENTRYMODESET | INCREMENT | DISPLAYSHIFTOFF);
 }
 
 static void HD44780_Test(unsigned char first_ch, unsigned char last_ch, int count) {

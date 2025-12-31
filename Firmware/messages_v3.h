@@ -27,6 +27,10 @@ void BPMSG1033_str(void);
 #define BPMSG1033 bp_message_write_buffer(__builtin_tbladdress(BPMSG1033_str))
 void BPMSG1034_str(void);
 #define BPMSG1034 bp_message_write_line(__builtin_tbladdress(BPMSG1034_str))
+void BPMSG1035_str(void);
+#define BPMSG1035 bp_message_write_line(__builtin_tbladdress(BPMSG1035_str))
+void BPMSG1036_str(void);
+#define BPMSG1036 bp_message_write_line(__builtin_tbladdress(BPMSG1036_str))
 void BPMSG1037_str(void);
 #define BPMSG1037 bp_message_write_line(__builtin_tbladdress(BPMSG1037_str))
 void BPMSG1038_str(void);
@@ -37,6 +41,10 @@ void BPMSG1040_str(void);
 #define BPMSG1040 bp_message_write_line(__builtin_tbladdress(BPMSG1040_str))
 void BPMSG1041_str(void);
 #define BPMSG1041 bp_message_write_line(__builtin_tbladdress(BPMSG1041_str))
+void BPMSG1042_str(void);
+#define BPMSG1042 bp_message_write_line(__builtin_tbladdress(BPMSG1042_str))
+void BPMSG1043_str(void);
+#define BPMSG1043 bp_message_write_line(__builtin_tbladdress(BPMSG1043_str))
 void BPMSG1047_str(void);
 #define BPMSG1047 bp_message_write_buffer(__builtin_tbladdress(BPMSG1047_str))
 void BPMSG1048_str(void);

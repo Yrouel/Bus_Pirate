@@ -76,6 +76,18 @@ _BPMSG1033_str:
 _BPMSG1034_str:
 	.pasciz "PWM active"
 
+	; BPMSG1035
+	.section .text.BPMSG1035, code
+	.global _BPMSG1035_str
+_BPMSG1035_str:
+	.pasciz "BLINKING ON"
+
+	; BPMSG1036
+	.section .text.BPMSG1036, code
+	.global _BPMSG1036_str
+_BPMSG1036_str:
+	.pasciz "BLINKING OFF"
+
 	; BPMSG1037
 	.section .text.BPMSG1037, code
 	.global _BPMSG1037_str
@@ -105,6 +117,18 @@ _BPMSG1040_str:
 	.global _BPMSG1041_str
 _BPMSG1041_str:
 	.pasciz "AUX LOW"
+
+	; BPMSG1042
+	.section .text.BPMSG1042, code
+	.global _BPMSG1042_str
+_BPMSG1042_str:
+	.pasciz "CURSOR ON"
+
+	; BPMSG1043
+	.section .text.BPMSG1043, code
+	.global _BPMSG1043_str
+_BPMSG1043_str:
+	.pasciz "CURSOR OFF"
 
 	; BPMSG1047
 	.section .text.BPMSG1047, code
@@ -644,7 +668,7 @@ _BPMSG1216_str:
 	.section .text.BPMSG1219, code
 	.global _BPMSG1219_str
 _BPMSG1219_str:
-	.pasciz " 0.Macro menu\r\n 1.Reset LCD\r\n 2.Init LCD\r\n 3.Clear LCD\r\n 4.Cursor position ex:(4) 0\r\n 5.Toggle backlight\r\n 6.Write test numbers ex:(6) 80\r\n 7.Write test characters ex:(7) 80"
+	.pasciz " 0.Macro menu\r\n 1.Reset LCD\r\n 2.Init LCD\r\n 3.Clear LCD\r\n 4.Toggle backlight\r\n 5.Toggle cursor\r\n 6.Toggle cursor blinking\r\n 7.Cursor position ex:(7) 0\r\n 8.Write test numbers ex:(8) 80\r\n 9.Write test characters ex:(9) 80"
 
 	; BPMSG1220
 	.section .text.BPMSG1220, code
