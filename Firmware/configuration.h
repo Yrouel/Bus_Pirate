@@ -295,6 +295,8 @@
  * @todo Clarify whether this code can still be used.
  */
 
+#define BP_CUSTOM_FEATURE_SET
+
 #ifndef BP_CUSTOM_FEATURE_SET
 
 #ifdef BUSPIRATEV4
@@ -318,7 +320,7 @@
 #define BP_ENABLE_1WIRE_SUPPORT
 #define BP_ENABLE_BASIC_SUPPORT
 #define BP_ENABLE_DIO_SUPPORT
-#define BP_ENABLE_HD44780_SUPPORT
+#undef BP_ENABLE_HD44780_SUPPORT
 #define BP_ENABLE_I2C_SUPPORT
 #define BP_ENABLE_JTAG_SUPPORT
 #define BP_ENABLE_PIC_SUPPORT
@@ -340,11 +342,12 @@
 #define BP_ENABLE_HD44780_SUPPORT
 #define BP_ENABLE_I2C_SUPPORT
 #define BP_ENABLE_JTAG_SUPPORT
-#define BP_ENABLE_PC_AT_KEYBOARD_SUPPORT
+#define BP_I2C_USE_HW_BUS
 #define BP_ENABLE_PIC_SUPPORT
+#define BP_ENABLE_PC_AT_KEYBOARD_SUPPORT
 #define BP_ENABLE_RAW_2WIRE_SUPPORT
 #define BP_ENABLE_RAW_3WIRE_SUPPORT
-#define BP_ENABLE_SMPS_SUPPORT
+#undef BP_ENABLE_SMPS_SUPPORT
 #define BP_ENABLE_SPI_SUPPORT
 #define BP_ENABLE_SUMP_SUPPORT
 #define BP_ENABLE_UART_SUPPORT
@@ -420,10 +423,14 @@
 
 #endif /* BUSPIRATEV4 */
 
+#if defined BP_CUSTOM_FEATURE_SET && defined BUSPIRATEV3
 /**
  * Size of the tokens buffer allocate to the BASIC interpreter, in bytes.
  */
+#define BP_BASIC_PROGRAM_SPACE 512
+#else
 #define BP_BASIC_PROGRAM_SPACE 1024
+#endif /* BP_CUSTOM_FEATURE_SET && BUSPIRATEV3 */
 
 /**
  * Maximum number of nested FOR-LOOP statements the BASIC interpreter can

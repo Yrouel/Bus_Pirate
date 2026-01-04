@@ -94,7 +94,7 @@
 
 #define ADAPTER_SPI 0
 #define ADAPTER_I2C 1
-
+/*
 #define SCL             BP_CLK
 #define SCL_TRIS        BP_CLK_DIR
 #define SDA             BP_MOSI
@@ -107,7 +107,8 @@
 #define SPIMOSI         BP_MOSI
 #define SPICLK          BP_CLK
 #define SPIMISO         BP_MISO
-#define SPICS           BP_CS
+*/
+#define SPICS BP_CS
 
 extern mode_configuration_t mode_configuration;
 extern command_t last_command;
@@ -208,20 +209,26 @@ void LCDsetup(void) {
         HD44780.RS_mask = PCF8574_LCD_RS;
         HD44780.RW_mask = PCF8574_LCD_RW;
         HD44780.LED_mask = PCF8574_LCD_LED;
-
+/*
         SCL_TRIS = INPUT;               //SCL Direction Register Bit
         SDA_TRIS = INPUT;               //SDA Direction Register Bit
 
         SCL = LOW;                      //B8 SCL
         SDA = LOW;                      //B9 SDA
-
+*/
         bitbang_setup(2, BITBANG_SPEED_100KHZ); //2wire mode, 100kHz (PCF8574 max)
     } else {
         HD44780.EN_mask = HCT595_LCD_EN;
         HD44780.RS_mask = HCT595_LCD_RS;
         HD44780.RW_mask = HCT595_LCD_RW;
         HD44780.LED_mask = HCT595_LCD_LED;
+        
+#ifdef BP_ENABLE_SPI_SUPPORT
+        spi_setup(3); //0b00011101, /*   1 MHz - Primary prescaler 16:1 / Secondary prescaler 1:1 */
+        SPICS = LOW;  //B6 CS low
+#endif /* BP_ENABLE_SPI_SUPPORT */
 
+        /*
 		//PPS Setup
 		// Inputs
 		RPINR20bits.SDI1R = BP_MISO_RPIN; //MISO
@@ -237,7 +244,7 @@ void LCDsetup(void) {
         SPIMISO_TRIS = INPUT;             //B7 SDI input
         SPIMOSI_TRIS = OUTPUT;            //B9 SDO output
 
-        /* CKE=1, CKP=0, SMP=0 */
+        // CKE=1, CKP=0, SMP=0
         SPI1CON1 = 0b0100111101; //(SPIspeed[modeConfig.speed]); // CKE (output edge) active to idle, CKP idle low, SMP data sampled middle of output time.
         //SPI1CON1=0b11101;
         //SPI1CON1bits.MSTEN=1;
@@ -247,6 +254,7 @@ void LCDsetup(void) {
         SPI1CON2 = 0x0000;
         SPI1STAT = 0x0000;    // clear SPI
         SPI1STATbits.SPIEN = ON;
+        */
     }
     BPMSG1216; // Adapter ready message
 }
@@ -340,12 +348,7 @@ void LCDmacro(unsigned int c) {
 }
 
 void LCDpins(void) {
-    if (HD44780.adapter_type == ADAPTER_I2C) {
-        MSG_I2C_PINS_STATE;
-    } else {
-        // BPMSG1226: "-\tCLK\t-\tMISO\t-\tMOSI\t-\tCS"
-        BPMSG1226;
-    }
+    (HD44780.adapter_type == ADAPTER_I2C) ? MSG_I2C_PINS_STATE : MSG_SPI_PINS_STATE;
 }
 
 //initialize LCD to 4bits with standard features
@@ -354,15 +357,15 @@ void HD44780_Init(unsigned char displaylines) {
     //Function set
     HD44780_WriteByte(HD44780_COMMAND, (CMD_FUNCTIONSET + DATAWIDTH4 + FONT5X7 + displaylines));//0x28, 0b101000
     bp_delay_ms(15);//delay 15ms
-    
+
     //Turn display off
     HD44780_WriteByte(HD44780_COMMAND, CMD_DISPLAYCONTROL + DISPLAYOFF + HD44780.cursor_presence + HD44780.cursor_blinking);//0x08, 0b1000
     bp_delay_ms(15);//delay 15ms
-    
+
     //Clear LCD and return home
     HD44780_WriteByte(HD44780_COMMAND, CMD_CLEARDISPLAY);
     bp_delay_ms(15);//delay 15ms
-    
+
     //Turn on display, cursor; turn off blink
     HD44780.cursor_presence ^= CURSORON; //keep state to avoid desync
     HD44780_WriteByte(HD44780_COMMAND, CMD_DISPLAYCONTROL + DISPLAYON + HD44780.cursor_presence + HD44780.cursor_blinking);// 0x0f, 0b1111
