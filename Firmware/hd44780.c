@@ -243,7 +243,17 @@ void LCDsetup(void) {
         //SPI1CON1bits.CKP=0;
         //SPI1CON1bits.CKE=1;           
         //SPI1CON1bits.SMP=0;
+
+        /*
+         * Duplicated spi_write_byte works with enhanced mode off while
+         * spi_write_byte from spi.c works with enhanced mode on
+         */
+#ifndef BP_ENABLE_SPI_SUPPORT 
         SPI1CON2 = 0x0000;
+#else
+        SPI1CON2 = 0x0001;
+#endif /* !BP_ENABLE_SPI_SUPPORT */
+
         SPI1STAT = 0x0000;    // clear SPI
         SPI1STATbits.SPIEN = ON;
     }
@@ -393,6 +403,7 @@ static void HD44780_Write(unsigned char datout) {
     } else {
         spi_write_byte(datout);
         SPICS = HIGH;   //B6 CS high
+        bp_delay_us(255); //because was getting garbled screen with test macros
         SPICS = LOW;    //B6 CS low
     }
 }
