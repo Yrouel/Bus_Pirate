@@ -244,14 +244,13 @@ void LCDsetup(void) {
         //SPI1CON1bits.CKE=1;           
         //SPI1CON1bits.SMP=0;
 
-        /*
-         * Duplicated spi_write_byte works with enhanced mode off while
-         * spi_write_byte from spi.c works with enhanced mode on
-         */
+/*
+ * Duplicated spi_write_byte works with enhanced mode off while spi_write_byte from spi.c works with enhanced mode on
+ */
 #ifndef BP_ENABLE_SPI_SUPPORT 
-        SPI1CON2 = 0x0000;
+        SPI1CON2 = 0x0000; // Enhanced mode off
 #else
-        SPI1CON2 = 0x0001;
+        SPI1CON2 = 0x0001; // Enhanced mode on
 #endif /* !BP_ENABLE_SPI_SUPPORT */
 
         SPI1STAT = 0x0000;    // clear SPI
