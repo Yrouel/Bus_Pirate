@@ -21,5 +21,14 @@
 
 #ifdef BP_ENABLE_SSD1306_SUPPORT
 
+unsigned int OLEDread(void);
+unsigned int OLEDwrite(unsigned int c);
+void OLEDstart(void);
+void OLEDstop(void);
+void OLEDsetup(void);
+void OLEDsetup_exc(void);
+void OLEDmacro(unsigned int c);
+void OLEDpins(void);
+
 #endif /* BP_ENABLE_SSD1306_SUPPORT */
 #endif /* !BP_SSD1306_H */

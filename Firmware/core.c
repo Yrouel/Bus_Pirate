@@ -56,6 +56,10 @@
 #include "hd44780.h"
 #endif /* BP_ENABLE_HD44780_SUPPORT */
 
+#ifdef BP_ENABLE_SSD1306_SUPPORT
+#include "ssd1306.h"
+#endif /* BP_ENABLE_SSD1306_SUPPORT */
+
 #ifdef BP_ENABLE_PIC_SUPPORT
 #include "pic.h"
 #endif /* BP_ENABLE_PIC_SUPPORT */
@@ -371,6 +375,31 @@ bus_pirate_protocol_t enabled_protocols[ENABLED_PROTOCOLS_COUNT] = {
      .print_settings = empty_print_settings_implementation,
      .name = "LCD"}
 #endif /* BP_ENABLE_HD44780_SUPPORT */
+
+#ifdef BP_ENABLE_SSD1306_SUPPORT
+    ,
+    {.start = OLEDstart,
+     .start_with_read = OLEDstart,
+     .stop = OLEDstop,
+     .stop_from_read = OLEDstop,
+     .send = OLEDwrite,
+     .read = null_data_read_callback,
+     .clock_high = null_operation_callback,
+     .clock_low = null_operation_callback,
+     .data_high = null_operation_callback,
+     .data_low = null_operation_callback,
+     .data_state = null_data_read_callback,
+     .clock_pulse = null_operation_callback,
+     .read_bit = null_bit_read_callback,
+     .periodic_update = null_bit_read_callback,
+     .run_macro = OLEDmacro,
+     .setup_prepare = OLEDsetup,
+     .setup_execute = OLEDsetup_exc,
+     .cleanup = spi_disable_interface,
+     .print_pins_state = OLEDpins,
+     .print_settings = empty_print_settings_implementation,
+     .name = "OLED"}
+#endif /* BP_ENABLE_SSD1306_SUPPORT */
 
 #ifdef BP_ENABLE_PIC_SUPPORT
     ,

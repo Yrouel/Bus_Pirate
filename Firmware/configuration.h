@@ -107,6 +107,17 @@
  */
 
 /**
+ * #define BP_ENABLE_SSD1306_SUPPORT
+ *
+ * Enable controlling a SSD1306 OLED controller connected via I2C.
+ *
+ * @note BPv3 default firmware status: OPTIONAL
+ * @note BPv4 default firmware status: OPTIONAL
+ *
+ * This module allows interaction with SSD1306-based I2C OLEDs
+ */
+
+/**
  * #define BP_ENABLE_I2C_SUPPORT
  *
  * Enable I2C protocol support in the built firmware.
@@ -304,6 +315,7 @@
 #define BP_ENABLE_BASIC_SUPPORT
 #define BP_ENABLE_DIO_SUPPORT
 #undef BP_ENABLE_HD44780_SUPPORT
+#undef BP_ENABLE_SSD1306_SUPPORT
 #define BP_ENABLE_I2C_SUPPORT
 #define BP_ENABLE_JTAG_SUPPORT
 #define BP_ENABLE_PIC_SUPPORT
@@ -321,6 +333,7 @@
 #define BP_ENABLE_BASIC_SUPPORT
 #define BP_ENABLE_DIO_SUPPORT
 #undef BP_ENABLE_HD44780_SUPPORT
+#undef BP_ENABLE_SSD1306_SUPPORT
 #define BP_ENABLE_I2C_SUPPORT
 #define BP_ENABLE_JTAG_SUPPORT
 #define BP_ENABLE_PIC_SUPPORT
@@ -340,6 +353,7 @@
 #define BP_ENABLE_BASIC_SUPPORT
 #define BP_ENABLE_DIO_SUPPORT
 #define BP_ENABLE_HD44780_SUPPORT
+#define BP_ENABLE_SSD1306_SUPPORT
 #define BP_ENABLE_I2C_SUPPORT
 #define BP_ENABLE_JTAG_SUPPORT
 #define BP_I2C_USE_HW_BUS

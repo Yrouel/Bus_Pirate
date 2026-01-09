@@ -25,14 +25,14 @@
 #include "proc_menu.h"
 
 //Define how the HCT595 pins connect to the LCD
-#define HCT595_LCD_LED  0b00000001   // P0
-#define HCT595_LCD_RS   0b00000010   // P1
-#define HCT595_LCD_RW   0b00000100   // P2
-#define HCT595_LCD_EN   0b00001000   // P3
-#define HCT595_LCD_D4   0b00010000   // P4
-#define HCT595_LCD_D5   0b00100000   // P5
-#define HCT595_LCD_D6   0b01000000   // P6
-#define HCT595_LCD_D7   0b10000000   // P7
+#define HCT595_LCD_LED  0b00000001   // QA
+#define HCT595_LCD_RS   0b00000010   // QB
+#define HCT595_LCD_RW   0b00000100   // QC
+#define HCT595_LCD_EN   0b00001000   // QD
+#define HCT595_LCD_D4   0b00010000   // QE
+#define HCT595_LCD_D5   0b00100000   // QF
+#define HCT595_LCD_D6   0b01000000   // QG
+#define HCT595_LCD_D7   0b10000000   // QH
 
 //Define how the PCF8574 pins connect to the LCD
 #define PCF8574_LCD_RS   0b00000001   // P0
@@ -94,11 +94,11 @@
 
 #define ADAPTER_SPI 0
 #define ADAPTER_I2C 1
-/*
-#define SCL             BP_CLK
-#define SCL_TRIS        BP_CLK_DIR
-#define SDA             BP_MOSI
-#define SDA_TRIS        BP_MOSI_DIR
+
+//#define SCL             BP_CLK
+//#define SCL_TRIS        BP_CLK_DIR
+//#define SDA             BP_MOSI
+//#define SDA_TRIS        BP_MOSI_DIR
 
 #define SPIMOSI_TRIS    BP_MOSI_DIR
 #define SPICLK_TRIS     BP_CLK_DIR
@@ -107,8 +107,7 @@
 #define SPIMOSI         BP_MOSI
 #define SPICLK          BP_CLK
 #define SPIMISO         BP_MISO
-*/
-#define SPICS BP_CS
+#define SPICS           BP_CS
 
 extern mode_configuration_t mode_configuration;
 extern command_t last_command;
@@ -119,8 +118,8 @@ struct _HD44780_interface {
     unsigned char RW:1; //read write, 0=write, 1=read
     unsigned char LED:1;
     unsigned char adapter_type:1;   //0=SPI (74HC595), 1=I2C (PCF8574)
-    unsigned char cursor_blinking:1;//Cursor blinking on or off
-    unsigned char cursor_presence;  //Cursor on or off
+    unsigned char cursor_blinking:1;//0=BLINKOFF, 1=BLINKON
+    unsigned char cursor_presence:2;//0b00=CURSOROFF, 0b10=CURSORON
     unsigned char i2c_address;      //PCF8574 write address (7-bit << 1)
     /* Abstract pinout across adapters */
     uint8_t EN_mask;
@@ -198,7 +197,7 @@ void LCDsetup(void) {
 
     // BPMSG1225: "Adapter type:\r\n 1. SPI (74HC595)\r\n 2. I2C (PCF8574)"
     BPMSG1225;
-    choice = getnumber(2, 1, 2, 0); //Default to I2C adapter
+    choice = getnumber(1, 1, 2, 0); //Default to I2C adapter
     HD44780.adapter_type = (choice == 2) ? ADAPTER_I2C : ADAPTER_SPI;
     
     if (HD44780.adapter_type == ADAPTER_I2C) {
@@ -209,27 +208,15 @@ void LCDsetup(void) {
         HD44780.RS_mask = PCF8574_LCD_RS;
         HD44780.RW_mask = PCF8574_LCD_RW;
         HD44780.LED_mask = PCF8574_LCD_LED;
-/*
-        SCL_TRIS = INPUT;               //SCL Direction Register Bit
-        SDA_TRIS = INPUT;               //SDA Direction Register Bit
 
-        SCL = LOW;                      //B8 SCL
-        SDA = LOW;                      //B9 SDA
-*/
         bitbang_setup(2, BITBANG_SPEED_100KHZ); //2wire mode, 100kHz (PCF8574 max)
     } else {
         HD44780.EN_mask = HCT595_LCD_EN;
         HD44780.RS_mask = HCT595_LCD_RS;
         HD44780.RW_mask = HCT595_LCD_RW;
         HD44780.LED_mask = HCT595_LCD_LED;
-        
-#ifdef BP_ENABLE_SPI_SUPPORT
-        spi_setup(3); //0b00011101, /*   1 MHz - Primary prescaler 16:1 / Secondary prescaler 1:1 */
-        SPICS = LOW;  //B6 CS low
-#endif /* BP_ENABLE_SPI_SUPPORT */
 
-        /*
-		//PPS Setup
+        //PPS Setup
 		// Inputs
 		RPINR20bits.SDI1R = BP_MISO_RPIN; //MISO
 		// Outputs
@@ -244,17 +231,25 @@ void LCDsetup(void) {
         SPIMISO_TRIS = INPUT;             //B7 SDI input
         SPIMOSI_TRIS = OUTPUT;            //B9 SDO output
 
-        // CKE=1, CKP=0, SMP=0
+        /* CKE=1, CKP=0, SMP=0 */
         SPI1CON1 = 0b0100111101; //(SPIspeed[modeConfig.speed]); // CKE (output edge) active to idle, CKP idle low, SMP data sampled middle of output time.
         //SPI1CON1=0b11101;
         //SPI1CON1bits.MSTEN=1;
         //SPI1CON1bits.CKP=0;
         //SPI1CON1bits.CKE=1;           
         //SPI1CON1bits.SMP=0;
-        SPI1CON2 = 0x0000;
-        SPI1STAT = 0x0000;    // clear SPI
+
+/*
+ * Duplicated spi_write_byte works with enhanced mode off while spi_write_byte from spi.c works with enhanced mode on
+ */
+#ifndef BP_ENABLE_SPI_SUPPORT 
+        SPI1CON2 = 0x0000; // Enhanced mode off
+#else
+        SPI1CON2 = 0x0001; // Enhanced mode on
+#endif /* !BP_ENABLE_SPI_SUPPORT */
+
+        SPI1STAT = 0;    // clear SPI
         SPI1STATbits.SPIEN = ON;
-        */
     }
     BPMSG1216; // Adapter ready message
 }
@@ -306,11 +301,17 @@ void LCDmacro(unsigned int c) {
             BPMSG1222;
             break;
         case 4:
-            //Flip LED bit. Drives the transistor on the adapter that switches the backlight
+            /* Flip LED bit.
+             * ATTENTION:
+             * For The Bus Pirate LCD adapter (HCT595) "LED" refers to the LED connected to pin 15 (QA) of the HCT595
+             * For the common I2C backpacks (PCF8574) "LED" refers to the actual backlight of the LCD driven by a transistor on P3.
+             * Therefore this code just blinks the LED on the BP LCD adapter while the backlight is controlled by AUX.
+             * (it would be a trivial modification of the BP LCD adapter to control the backlight instead of the LED)
+             */
             HD44780.LED = !HD44780.LED;
             
             /*
-             * Toggle the backlight while preserving everything else by sending a harmless command
+             * Toggle the LED while preserving everything else by sending a harmless command
              * This is a workaround and a bit of a hack after trying to toggle it
              * more explicitly/directly caused issues like garbled text or losing init
              */
@@ -431,6 +432,7 @@ static void HD44780_Write(unsigned char datout) {
     } else {
         spi_write_byte(datout);
         SPICS = HIGH;   //B6 CS high
+        bp_delay_us(255); //because was getting garbled screen with test macros
         SPICS = LOW;    //B6 CS low
     }
 }

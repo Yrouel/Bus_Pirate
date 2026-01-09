@@ -668,7 +668,7 @@ _BPMSG1216_str:
 	.section .text.BPMSG1219, code
 	.global _BPMSG1219_str
 _BPMSG1219_str:
-	.pasciz " 0.Macro menu\r\n 1.Reset LCD\r\n 2.Init LCD\r\n 3.Clear LCD\r\n 4.Toggle backlight\r\n 5.Toggle cursor\r\n 6.Toggle cursor blinking\r\n 7.Cursor position ex:(7) 0\r\n 8.Write test numbers ex:(8) 80\r\n 9.Write test characters ex:(9) 80"
+	.pasciz " 0.Macro menu\r\n 1.Reset LCD\r\n 2.Init LCD\r\n 3.Clear LCD\r\n 4.Toggle LED\r\n 5.Toggle cursor\r\n 6.Toggle cursor blinking\r\n 7.Cursor position ex:(7) 0\r\n 8.Write test numbers ex:(8) 80\r\n 9.Write test characters ex:(9) 80"
 
 	; BPMSG1220
 	.section .text.BPMSG1220, code
